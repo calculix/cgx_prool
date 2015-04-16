@@ -88,6 +88,8 @@ void generalinfo()
   printf("  -read         forces the program to read the complete result-file     \n"); 
   printf("                at startup                                              \n");     
   printf("                                                                        \n"); 
+
+  prool_version();
 }
 
 /* 

@@ -4,7 +4,7 @@ CFLAGS = -O3 -Wall \
   -I/usr/include/GL \
   -I../../libSNL/src \
   -I../../glut-3.5/src \
-  -I/usr/X11/include 
+  -I/usr/X11/include
 
 LFLAGS = \
   -L/usr/lib64 -lGL -lGLU \
@@ -68,5 +68,9 @@ OUTIL = $(SUTIL:.c=.o)
 cgx: $(OLIB) $(OUTIL) $(OULIB)
 	g++  $(OULIB)  $(OLIB) $(OUTIL)  $(CFLAGS) $(LFLAGS) -o  $@
 
+clean:
+	rm *.o
+	rm cgx
+	rm aaa
 
-
+setFunktions.o:	setFunktions.c prool.h prool.c
