@@ -175,6 +175,8 @@ int       nodeCsys=0;                        /*  Number of coordinate systems (n
 int       nodeCsysSet[MAX_MATERIALS];        /*  setNr  */
 int       nodeCsysNr[MAX_MATERIALS];         /*  csysNr  */
 
+int prool_timer=0;
+
 /* mpc generation between incompatible element-types for connected bodies */
 int sum_equSets=0, *depSet=NULL, *indSet=NULL;
 
@@ -10283,6 +10285,8 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   static int ifFlag=1, whileFlag=1, returnFlag=1;
   char parameter[20][MAX_LINE_LENGTH];
 
+printf("prooldebug. commandoInterpreter() '%s' '%s' %i\n", type, string, na);
+
   for(j=0;j<strlen(type); j++) type[j]=toupper(type[j]);
  whileLoop:;
   for(j=0;j<MAX_PARAM_PER_RECORD; j++) dat[j][0]=0;
@@ -11086,6 +11090,8 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   else if (compareStrings(type, "PRNT")>0) prnt(&string[na+1]);
   else if (compareStrings(type, "QUIT")>0) exit(0);
   else if (compareStrings(type, "PROOL")>0) prool_commands();
+  else if (compareStrings(type, "TIMERON")>0) {prool_timer=1; glutTimerFunc(33, TimerFunction, 1); }
+  else if (compareStrings(type, "TIMEROFF")>0) prool_timer=0;
   else if (compareStrings(type, "WRITE")>0) prnt2(&string[na+1]);
   else if (compareStrings(type, "WRITEONE")>0) writeone(&string[na+1]);
   else if (compareStrings(type, "WRITEINONE")>0) writeinone(&string[na+1]);

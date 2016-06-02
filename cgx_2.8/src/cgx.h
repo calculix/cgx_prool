@@ -825,3 +825,6 @@ int surfToShape(int s);
 void uncut(int surfFlagBuffer);
 int crecord( char *rec_str, char **dat);
 void descalAll(void);
+
+/* by prool */
+void TimerFunction(void);

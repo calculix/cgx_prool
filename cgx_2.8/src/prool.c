@@ -466,9 +466,13 @@ SENDASTER path - send all aster -> path\n\
 SENDANS path - send all ans -> path\n\
 SENDNAS path - send all nas -> path\n\
 SENDSTL path - send all stl -> path\n\
-	For example: sendstl c:\files\msh\my_mesh.stl\n\
+	For example: sendstl c:\\files\\msh\\my_mesh.stl\n\
 \n\
 ");
+printf("Prool timer is ");
+if (prool_timer) printf("on");
+else printf("off");
+printf("\n\n");
 }
 
 // print2() begin // prool's mod of prnt() function
