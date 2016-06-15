@@ -1766,7 +1766,7 @@ int zamena_s8(char *str) // prool
 char buffer[STRLEN];
 char *pp;
 
-if (pp=strstr(str,"TYPE=S8"))
+if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	{
 	printf("DEBUG zamena_s8(). str=`%s'\n", str);
 	strcpy(buffer,pp+7);
