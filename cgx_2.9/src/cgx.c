@@ -24,6 +24,8 @@
 #include <time.h>
 #include <sys/utsname.h>
 
+#include <stdio.h> // prool
+
 #define     VERSION         "2.9.1"
 #define     TEST            0
 
@@ -88,6 +90,8 @@ void generalinfo()
   printf("  -read         forces the program to read the complete result-file     \n"); 
   printf("                at startup                                              \n");     
   printf("                                                                        \n"); 
+
+  prool_version();
 }
 
 /* 
@@ -134,7 +138,7 @@ trX e,s,c should be possible with the unstructured mesher
 
 */
 
-
+extern int prool_timer;
 
 /* keyboard history */
 char **key_history=(char **)NULL;
@@ -4265,6 +4269,8 @@ void DrawGraficLoad( void )
   static int flipflop;
   double xc, yc, dxscal;
 
+//printf("prooldebug: DrawGraficLoad\n");
+
 #if INX_MODE
   glClearIndex ( basCol[backgrndcol] );
 #endif
@@ -4347,6 +4353,8 @@ void DrawGraficLight( void )
   static int flipflop;
   double xc, yc, dxscal;
 
+//printf("prooldebug: DrawGraficLight. unixtime=%li\n", time(0));
+
 #if INX_MODE
   glClearIndex ( basCol[backgrndcol] );
 #endif
@@ -4414,6 +4422,8 @@ void DrawGraficAnimate( void )
   static int t0, t1, flipflop;
   static double freqb, freqb_soll;
   double xc, yc, dxscal;
+
+//printf("prooldebug: void DrawGraficAnimate( void )\n");
 
 #if TEST
   frameNr++;
@@ -4525,6 +4535,8 @@ void DrawGraficSequence( void )
   static double freqb, freqb_soll;
   double xc, yc, dxscal;
   char key;
+
+//printf("prooldebug: void DrawGraficSequence( void )\n");
 
 #if TEST
   frameNr++;
@@ -4677,6 +4689,8 @@ void DrawPickedItems()
   static int flipflop;
   double xc, yc, dxscal;
 
+//printf("prooldebug: void DrawPickedItems()\n");
+
 #if INX_MODE
   glClearIndex ( basCol[backgrndcol] );
 #endif
@@ -4805,6 +4819,8 @@ void DrawAxes()
 {
   static char buffer[MAX_LINE_LENGTH];
 
+//printf("prooldebug: void DrawAxes()\n");
+
 #if INX_MODE
   glClearIndex ( basCol[backgrndcol] );
 #endif
@@ -4865,6 +4881,8 @@ void DrawAxes()
 void idleFunction(void)
 {
   int i,k;
+
+//printf("prooldebug: idleFunction()\n");
 
   glutSetWindow( w0);
   glutDisplayFunc ( DrawMenuSet );
@@ -5008,6 +5026,8 @@ void DrawMenuLoad( void )
   defineColTextur_load();
 #endif
 
+//printf("prooldebug: void DrawMenuLoad( void )\n");
+
   iniDrawMenu();
   if (scalaFlag)
   {
@@ -5072,6 +5092,8 @@ void DrawMenuSequence( void )
   defineColTextur_load();
 #endif
 
+//printf("prooldebug: void DrawMenuSequence( void )\n");
+
   iniDrawMenu();
   if (scalaFlag)
   {
@@ -5125,6 +5147,7 @@ void DrawMenuSequence( void )
 
 void DrawMenuLight( void )
 {
+//printf("prooldebug: void DrawMenuLight( void )\n");
   iniDrawMenu();
     if(addDispFlag)
     {
@@ -5139,6 +5162,8 @@ void DrawMenuLight( void )
 void DrawMenuAnimate( void )
 {
   char buffer[MAX_LINE_LENGTH];
+
+//printf("prooldebug: void DrawMenuAnimate( void )\n");
 
   iniDrawMenu();
   if ((!sequenceFlag)&&(cur_lc > -1))
@@ -5162,6 +5187,7 @@ void DrawMenuAnimate( void )
 
 void DrawMenuSet( void )
 {
+//printf("prooldebug: void DrawMenuSet( void )\n");
 #if INX_MODE
   defineColIndexes_set();
 #endif
@@ -5265,7 +5291,51 @@ void initLightAndMaterial_index( void )
 
   glEnable(GL_LIGHT0);
 }
+#define MAXLEN 512
+void TimerFunction(void) // Sample timer func. by prool
+{FILE *fp;
+int i, space;
+char *cc;
+char str[MAXLEN], str2[MAXLEN];
 
+if (prool_timer==0) return;
+
+//printf("prool: timer %li\n", time(0));
+
+fp=fopen("prool.cmd","r");
+if (fp)
+	{
+	printf("file found\n");
+	str[0]=0;
+	fgets(str, MAXLEN, fp);
+	fclose(fp);
+	remove("prool.cmd");
+	if (str[0]==0) {printf("no command in file\n");}
+	else
+		{
+		cc=strchr(str,'\n'); if (cc) *cc=0;
+		cc=strchr(str,'\r'); if (cc) *cc=0;
+		space=0;
+		for (i=0;i<strlen(str);i++) if (str[i]==' ') space=i;
+		for (i=0;i<MAXLEN;i++) str2[i]=0;
+		if (space)
+			{// arguments present
+			strncpy(str2,str,space);
+			for (i=0;i<strlen(str2);i++) str2[i]=toupper(str2[i]);
+        		commandoInterpreter( str2, str, strlen(str2), 0, 0, 0, 0 );
+			}
+		else
+			{// no arguments
+			strcpy(str2, str);
+			for (i=0;i<strlen(str2);i++) str2[i]=toupper(str2[i]);
+        		commandoInterpreter( str2, str, strlen(str2), 0, 0, 0, 0 );
+			}
+		}
+	}
+//else printf("file not found\n");
+
+glutTimerFunc(1000, TimerFunction, 1);
+}
 
 int main ( int argc, char **argv )
 {
@@ -5273,6 +5343,7 @@ int main ( int argc, char **argv )
   char buffer[MAX_LINE_LENGTH];
   static char ccxfile[MAX_LINE_LENGTH];
 
+prool_timer=0;
 
   lcase=NULL;
   node=NULL;
@@ -5564,6 +5635,17 @@ int main ( int argc, char **argv )
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
 #endif
   glutInit ( &argc, argv );
+
+#if 0 // by prool
+glutGameModeString("800x600:32");
+	if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE))
+		glutEnterGameMode();
+	else {
+		printf("Rezhim ne dostupen\n");
+		exit(1);
+	}
+#endif
+
   sprintf (buffer, "Calculix Graphix");
   activWindow= w0 = glutCreateWindow ( buffer );
   glDisable ( GL_DEPTH_TEST );
@@ -5794,11 +5876,13 @@ int main ( int argc, char **argv )
   printHash();
 #endif
 
+#if 1 // prool
+if (prool_timer) glutTimerFunc(33, TimerFunction, 1);
+#endif
+
   glutMainLoop ();
   return(1);
 }
-
-
 
 void printHash()
 {
