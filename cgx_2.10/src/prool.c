@@ -2003,9 +2003,13 @@ printf("execute SEND ALL ABQ NAM\n");
 pre_write(" all abq nam ");
 #endif
 #if 1 // new variant
+
+prnt2("se");
+
 printf("exec SEND * ABQ\n");
 
 glist=fopen("list1.out","r");
+if (!glist) {printf("Cant open list1.out :(\n"); return;}
 if (glist)
 	{
 	while(!feof(glist))
@@ -2167,25 +2171,100 @@ flag();
 
 void writeinone(char *path) // prool
 {
-FILE *allinone;
+FILE *allinone, *glist;
 DIR *dir;
 struct dirent *file;
 char buf[STRLEN];
+char buf2[STRLEN];
 int string_num=1, node_num=0;
 char current_dir[255], fullname[255];
+char *c;
 
-printf("WRITEONE command:\n");
+printf("WRITEINONE command:\n");
 printf("path = `%s'\n", path);
 //if (path[0]==0) printf("path is zero ;)\n");
 
-printf("exec SEND ALL ABQ\n");
-pre_write(" all abq ");
-                                    
-printf("execute SEND ALL ABQ NAM\n");
-pre_write(" all abq nam ");
+#if 1 // new variant
 
-printf("execute SEND ALL ABQ SUR\n");
-pre_write(" all abq sur ");
+prnt2("se");
+
+printf("exec SEND * ABQ\n");
+
+glist=fopen("list1.out","r");
+if (!glist) {printf("Cant open list1.out :(\n"); return;}
+if (glist)
+	{
+	while(!feof(glist))
+		{
+		buf[0]=0;
+		fgets(buf, STRLEN, glist);
+		c=strchr(buf,'\n');
+		if (c) *c=0;
+		if (buf[0])
+			{
+			printf("'%s'\n", buf);
+			buf2[0]=0;
+			strcpy(buf2, " ");
+			strcat(buf2, buf);
+			strcat(buf2, " abq ");
+			printf("exec: '%s'\n", buf2);
+			pre_write(buf2);
+			}
+		}
+	fclose(glist);
+	}
+
+printf("execute SEND * ABQ NAM\n");
+
+glist=fopen("list2.out","r");
+if (glist)
+	{
+	while(!feof(glist))
+		{
+		buf[0]=0;
+		fgets(buf, STRLEN, glist);
+		c=strchr(buf,'\n');
+		if (c) *c=0;
+		if (buf[0])
+			{
+			printf("'%s'\n", buf);
+			buf2[0]=0;
+			strcpy(buf2, " ");
+			strcat(buf2, buf);
+			strcat(buf2, " abq nam ");
+			printf("exec: '%s'\n", buf2);
+			pre_write(buf2);
+			}
+		}
+	fclose(glist);
+	}
+
+#endif
+                                    
+printf("execute SEND * ABQ SUR\n");
+
+glist=fopen("list3.out","r");
+if (glist)
+	{
+	while(!feof(glist))
+		{
+		buf[0]=0;
+		fgets(buf, STRLEN, glist);
+		c=strchr(buf,'\n');
+		if (c) *c=0;
+		if (buf[0])
+			{
+			printf("'%s'\n", buf);
+			buf2[0]=0;
+			strcpy(buf2, " ");
+			strcat(buf2, buf);
+			strcat(buf2, " abq sur ");
+			printf("exec: '%s'\n", buf2);
+			pre_write(buf2);
+			}
+		}
+	fclose(glist);
+	}
 
 getcwd(current_dir, 255);
 printf("current dir = %s\n", current_dir);
@@ -2196,37 +2275,49 @@ if (path[0]) {strcpy(fullname,path); strcat(fullname,"\\"); strcat(fullname,ALLI
 else strcpy(fullname,ALLINONE);
 
 printf("fullname = %s\n", fullname);
-printf("copy all.msh ->\n");
 
-allinone=fopen(fullname,"w");
-if (allinone==NULL) {printf("writeone error 1\n"); return;}
-
-f=fopen("all.msh","r");
-if (f==NULL) {printf("writeone error 2\n"); return;}
-
-while (fgets(buf, STRLEN, f))
-	{
-	if (string_num++==2)
-		{
-		sscanf(buf,"%i",&node_num);
-		if (node_num==0)
+// process *.msh
+///
+dir=opendir(".");
+while(file=readdir(dir))
+	{char *fn;
+	fn=file->d_name;
+	if (strlen(fn)>4)
+		if (!strcmp(fn+strlen(fn)-4,".msh"))
 			{
-			printf("zero node skipped :)\n");
-			continue;
+			if (!strcmp(fn,"all.msh"))  { unlink(fn); continue; }
+			if (!strcmp(fn,"Eall.msh")) { unlink(fn); continue; }
+			if (!strcmp(fn,"Nall.msh")) { unlink(fn); continue; }
+			{
+			printf("copy %s ->\n",fn);
+			f=fopen(fn,"r");string_num=1;
+			if (f==NULL) {printf("writeone error 2A2\n"); return;}
+			while (fgets(buf, STRLEN, f))
+				{
+				if (string_num++==2)
+					{
+					sscanf(buf,"%i",&node_num);
+					if (node_num==0)
+						{
+						printf("zero node skipped :)\n");
+						continue;
+						}
+				}
+				// process_string(buf);
+				filter_string(buf);
+				zamena_s8(buf);
+				fputs(buf, allinone);
+				}
+			fclose(f);
+			unlink(fn);
+			fputs("", allinone); // empty string
 			}
-		}
-	// process_string(buf);
-	filter_string(buf);
-//	if (strstr(buf,", SPOS")) continue;
-	zamena_s8(buf);
-	fputs(buf, allinone);
+			}
 	}
-fclose(f);
+closedir(dir);
+///
 
-unlink("all.msh");
-
-fputs("", allinone); // empty string
-
+// process *.nam
 dir=opendir(".");
 while(file=readdir(dir))
 	{char *fn, *pp2, gruppa[255], komanda[255];
@@ -2268,6 +2359,7 @@ closedir(dir);
 
 fputs("", allinone); // empty string
 
+// process *.sur
 dir=opendir(".");
 while(file=readdir(dir))
 	{char *fn, *pp2, gruppa[255], komanda[255];
@@ -2316,6 +2408,8 @@ char current_dir[255], fullname[255];
 printf("WRIT4SHELL command:\n");
 printf("path = `%s'\n", path);
 //if (path[0]==0) printf("path is zero ;)\n");
+
+prnt2("se");
 
 printf("exec SEND ALL ABQ\n");
 pre_write(" all abq ");
