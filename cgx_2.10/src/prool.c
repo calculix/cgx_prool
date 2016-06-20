@@ -1,6 +1,8 @@
 // prool code
 // http://calculixforwin.com http://prool.kharkov.org <proolix@gmail.com>
 
+#define FCLOSE3 if (f1) {fclose(f1); fclose(f2); fclose(f3);}
+
 FILE *f; // prool
 
 void  prool_version()
@@ -9,6 +11,7 @@ printf("Built by Prool %s %s proolix@gmail.com\n\
 http://calculixforwin.com\n\
 Use PROOL command in CGX main window for additional info\n\
 ",__DATE__,__TIME__);
+//printf("ОКАЩЕНЕНО\n");
 }
 
 void debug()
@@ -486,7 +489,14 @@ int prnt2(char *record)
   char parameter[20][MAX_LINE_LENGTH];
   char *str=NULL, *token=NULL, *saveptr=NULL;
 
-	f=fopen("cgx.out", "w"); // prool
+	FILE *f1, *f2, *f3;
+
+	f=fopen("cgx.out", "w");
+	if (!f) {printf("prool: prnt2(): current dir not writable :-(\n"); return -1;}
+	f1=fopen("list1.out", "w");
+	f2=fopen("list2.out", "w");
+	f3=fopen("list3.out", "w"); 
+	//fprintf(f,"# prooltest\n");
 
   param[0]=0;
   length=sscanf(record,"%s%s%s",typ,name,param);
@@ -681,10 +691,27 @@ int prnt2(char *record)
           if (!set[i].type)
           {
             printf ("%-5d %s stat:%c n:%d e:%d f:%d p:%d l:%d s:%d b:%d L:%d S:%d se:%d sh:%d v:%d\n", set[i].index, set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh, set[i].anz_v);
+            fprintf (f, "%-5d %s stat:%c n:%d e:%d f:%d p:%d l:%d s:%d b:%d L:%d S:%d se:%d sh:%d v:%d\n", set[i].index, set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh, set[i].anz_v);
+		// Lists of groups for extended command WRITEONE, WRITEINONE, WRITE4SHELL. prool
+		if (set[i].anz_e) 
+			{
+			if ((strcmp(set[i].name,"all"))&&(strcmp(set[i].name,"Eall"))&&(strcmp(set[i].name,"Nall")))
+				if (f1) fprintf(f1, "%s\n", set[i].name);
+			}
+		if (set[i].anz_n) 
+			{
+			if ((strcmp(set[i].name,"all"))&&(strcmp(set[i].name,"Eall"))&&(strcmp(set[i].name,"Nall")))
+				if (f2) fprintf(f2, "%s\n", set[i].name);
+			}
+		if (set[i].anz_f) 
+			{
+			if ((strcmp(set[i].name,"all"))&&(strcmp(set[i].name,"Eall"))&&(strcmp(set[i].name,"Nall")))
+				if (f3) fprintf(f3, "%s\n", set[i].name);
+			}
           }
         }
       }
-      fflush(NULL); fclose(f); flag(); return(1);
+      fflush(NULL); fclose(f); FCLOSE3 flag(); /*printf("FCLOSE3\n");*/ return(1);
     }
     else
     {
@@ -1648,7 +1675,7 @@ int prnt2(char *record)
   fflush(NULL); fclose(f); flag(); return(1);
 }
 
-// prnt2() end
+// prnt2() end // тут используются вызовы fprintf & fclose
 
 void process_string (char str[]) // prool
 {
@@ -1955,10 +1982,12 @@ if (1)
 
 void writeone(char *path) // prool
 {
-FILE *allinone;
+FILE *allinone, *glist; // glist = group list
 DIR *dir;
 struct dirent *file;
 char buf[STRLEN];
+char buf2[STRLEN];
+char *c;
 int string_num=1, node_num=0;
 char current_dir[255], fullname[255];
 
@@ -1966,26 +1995,120 @@ printf("WRITEONE command:\n");
 printf("path = `%s'\n", path);
 //if (path[0]==0) printf("path is zero ;)\n");
 
+#if 0 // old variant
 printf("exec SEND ALL ABQ\n");
 pre_write(" all abq ");
                                     
 printf("execute SEND ALL ABQ NAM\n");
 pre_write(" all abq nam ");
+#endif
+#if 1 // new variant
+printf("exec SEND * ABQ\n");
+
+glist=fopen("list1.out","r");
+if (glist)
+	{
+	while(!feof(glist))
+		{
+		buf[0]=0;
+		fgets(buf, STRLEN, glist);
+		c=strchr(buf,'\n');
+		if (c) *c=0;
+		if (buf[0])
+			{
+			printf("'%s'\n", buf);
+			buf2[0]=0;
+			strcpy(buf2, " ");
+			strcat(buf2, buf);
+			strcat(buf2, " abq ");
+			printf("exec: '%s'\n", buf2);
+			pre_write(buf2);
+			}
+		}
+	fclose(glist);
+	}
+
+printf("execute SEND * ABQ NAM\n");
+
+glist=fopen("list2.out","r");
+if (glist)
+	{
+	while(!feof(glist))
+		{
+		buf[0]=0;
+		fgets(buf, STRLEN, glist);
+		c=strchr(buf,'\n');
+		if (c) *c=0;
+		if (buf[0])
+			{
+			printf("'%s'\n", buf);
+			buf2[0]=0;
+			strcpy(buf2, " ");
+			strcat(buf2, buf);
+			strcat(buf2, " abq nam ");
+			printf("exec: '%s'\n", buf2);
+			pre_write(buf2);
+			}
+		}
+	fclose(glist);
+	}
+
+#endif
 
 getcwd(current_dir, 255);
 printf("current dir = %s\n", current_dir);
 
 #define ALLINONE "allinone.inp"
 
-if (path[0]) {strcpy(fullname,path); strcat(fullname,"\\"); strcat(fullname,ALLINONE);}
+if (path[0]) {strcpy(fullname,path); strcat(fullname,"/"); strcat(fullname,ALLINONE);}
 else strcpy(fullname,ALLINONE);
 
 printf("fullname = %s\n", fullname);
-printf("copy all.msh ->\n");
 
 allinone=fopen(fullname,"w");
 if (allinone==NULL) {printf("writeone error 1\n"); return;}
 
+///
+dir=opendir(".");
+while(file=readdir(dir))
+	{char *fn;
+	fn=file->d_name;
+	if (strlen(fn)>4)
+		if (!strcmp(fn+strlen(fn)-4,".msh"))
+			{
+			if (!strcmp(fn,"all.msh"))  { unlink(fn); continue; }
+			if (!strcmp(fn,"Eall.msh")) { unlink(fn); continue; }
+			if (!strcmp(fn,"Nall.msh")) { unlink(fn); continue; }
+			{
+			printf("copy %s ->\n",fn);
+			f=fopen(fn,"r");string_num=1;
+			if (f==NULL) {printf("writeone error 2A2\n"); return;}
+			while (fgets(buf, STRLEN, f))
+				{
+				if (string_num++==2)
+					{
+					sscanf(buf,"%i",&node_num);
+					if (node_num==0)
+						{
+						printf("zero node skipped :)\n");
+						continue;
+						}
+				}
+				// process_string(buf);
+				filter_string(buf);
+				zamena_s8(buf);
+				fputs(buf, allinone);
+				}
+			fclose(f);
+			unlink(fn);
+			fputs("", allinone); // empty string
+			}
+			}
+	}
+closedir(dir);
+///
+
+#if 0
 f=fopen("all.msh","r");
 if (f==NULL) {printf("writeone error 2\n"); return;}
 
@@ -2006,10 +2129,7 @@ while (fgets(buf, STRLEN, f))
 	fputs(buf, allinone);
 	}
 fclose(f);
-
-unlink("all.msh");
-
-fputs("", allinone); // empty string
+#endif
 
 dir=opendir(".");
 while(file=readdir(dir))
