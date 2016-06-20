@@ -835,3 +835,6 @@ void descalAll(void);
 int getSetNrx(char *name);
 int setax( int setNr, char *type, int number);
 int pre_setax( char *string, char *type, char *name);
+
+/* by prool */
+void TimerFunction(void);
