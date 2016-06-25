@@ -10285,7 +10285,7 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   static int ifFlag=1, whileFlag=1, returnFlag=1;
   char parameter[20][MAX_LINE_LENGTH];
 
-printf("prooldebug. commandoInterpreter() '%s' '%s' %i\n", type, string, na);
+//printf("prooldebug. commandoInterpreter() '%s' '%s' %i\n", type, string, na);
 
   for(j=0;j<strlen(type); j++) type[j]=toupper(type[j]);
  whileLoop:;
@@ -11096,6 +11096,7 @@ printf("prooldebug. commandoInterpreter() '%s' '%s' %i\n", type, string, na);
   else if (compareStrings(type, "WRITEONE")>0) writeone(&string[na+1]);
   else if (compareStrings(type, "WRITEINONE")>0) writeinone(&string[na+1]);
   else if (compareStrings(type, "WRITE4SHELL")>0) write4shell(&string[na+1]);
+  else if (compareStrings(type, "SENDBB")>0) send_bbox();
   else if (compareStrings(type, "ECHO")>0) echo(&string[na+1]);
   else if (compareStrings(type, "SENDPRES")>0) sendpres(&string[na+1]);
   else if (compareStrings(type, "SENDPRES4SHELL")>0) sendpres4shell(&string[na+1]);
