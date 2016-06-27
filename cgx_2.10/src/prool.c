@@ -469,10 +469,12 @@ SENDSTL path - send all stl -> path\n\
 	For example: sendstl c:\\files\\msh\\my_mesh.stl\n\
 \n\
 ");
+#if 0
 printf("Prool timer is ");
 if (prool_timer) printf("on");
 else printf("off");
 printf("\n\n");
+#endif
 }
 
 // print2() begin // prool's mod of prnt() function

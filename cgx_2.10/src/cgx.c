@@ -384,7 +384,7 @@ int askGLError(char buffer[MAX_LINE_LENGTH])
   return (0);
 }
 
-extern int prool_timer;
+//extern int prool_timer;
 
 /* realloc_colNr() must be executed before the call to nodalDataset() and each time new nodes were created */
 void realloc_colNr(void)
@@ -5512,6 +5512,8 @@ void initLightAndMaterial_index( void )
   glEnable(GL_LIGHT0);
 }
 #define MAXLEN 512
+
+#if 0
 void TimerFunction(void) // Sample timer func. by prool
 {FILE *fp;
 int i, space;
@@ -5556,6 +5558,7 @@ if (fp)
 
 glutTimerFunc(1000, TimerFunction, 1);
 }
+#endif
 
 int main ( int argc, char **argv )
 {
@@ -5563,7 +5566,7 @@ int main ( int argc, char **argv )
   char buffer[MAX_LINE_LENGTH];
   static char ccxfile[MAX_LINE_LENGTH];
 
-prool_timer=0;
+//prool_timer=0;
 
   lcase=NULL;
   node=NULL;
@@ -6093,7 +6096,7 @@ glutGameModeString("800x600:32");
   printHash();
 #endif
 
-#if 1 // prool
+#if 0 // prool
 if (prool_timer) glutTimerFunc(33, TimerFunction, 1);
 #endif
 
