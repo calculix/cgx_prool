@@ -467,6 +467,7 @@ SENDANS path - send all ans -> path\n\
 SENDNAS path - send all nas -> path\n\
 SENDSTL path - send all stl -> path\n\
 	For example: sendstl c:\\files\\msh\\my_mesh.stl\n\
+SENDBB - send size of bound box to file box.txt\n\
 \n\
 ");
 #if 0
@@ -2327,3 +2328,67 @@ fclose(allinone);
 flag(); 
 }
 // end of write4shell() // by prool
+
+
+void send_bbox (void)
+{ /* Надо будет вот эту функцию
+send bbox
+которая записывает в той же папке файл с тремя строками
+первая строка
+xmax-xmin для узлов Nall
+вторая строка
+ymax-ymin для узлов Nall
+третья строка
+zmax-zmin для узлов Nall
+
+послать все узлы можете на диск как send all abq - будет как раз сначала список узлов c координатами */
+
+char buf [BUFLEN];
+int num;
+float x,y,z, maxx, maxy, maxz, minx, miny, minz;
+FILE *file;
+char *stroka, *pp;
+int first_line;
+
+printf("send_bbox command by prool\n");
+printf("exec SEND ALL ABQ\n");
+pre_write(" all abq ");
+
+file=fopen("all.msh", "r");
+
+if (!file) {printf("send_bbox error: can't open file all.msh :-(\n"); return;}
+
+fgets(buf, BUFLEN, file); // skip first line *NODE, NSET=Nall
+first_line=1;
+
+while (!feof(file))
+	{
+	buf[0]=0;
+	fgets(buf, BUFLEN, file);
+	if (buf[0]==0) break;
+	if (buf[0]=='*') break;
+	sscanf(buf,"%i,%e,%e,%e", &num, &x, &y, &z);
+	if (first_line==1) {first_line=0; maxx=x; maxy=y; maxz=z; minx=x; miny=y; minz=z;}
+	else
+		{
+		if (x>maxx) maxx=x;
+		if (y>maxy) maxy=y;
+		if (z>maxz) maxz=z;
+
+		if (x<minx) minx=x;
+		if (y<miny) miny=y;
+		if (z<minz) minz=z;
+		}
+	//printf("num=%i x=%e y=%e z=%e\n", num, x, y, z);
+	}
+printf("maxx=%e minx=%e maxy=%e miny=%e maxz=%e minz=%e\ndx=%e dy=%e dz=%e\n",
+maxx, minx, maxy, miny, maxz, minz, maxx-minx, maxy-miny, maxz-minz);
+fclose(file);
+
+file=fopen("box.txt", "w");
+if (!file) {printf("send_bb error: Can't create file box.txt\n"); return;}
+fprintf(file, "%e\n",maxx-minx);
+fprintf(file, "%e\n",maxy-miny);
+fprintf(file, "%e\n",maxz-minz);
+fclose(file);
+}

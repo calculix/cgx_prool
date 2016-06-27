@@ -11702,6 +11702,7 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   else if (compareStrings(type, "PRNT")>0) prnt(&string[na+1]);
   else if (compareStrings(type, "QUIT")>0) exit(0);
   else if (compareStrings(type, "PROOL")>0) prool_commands();
+  else if (compareStrings(type, "SENDBB")>0) send_bbox();
   //else if (compareStrings(type, "TIMERON")>0) {prool_timer=1; glutTimerFunc(33, TimerFunction, 1); }
   //else if (compareStrings(type, "TIMEROFF")>0) prool_timer=0;
   else if (compareStrings(type, "WRITE")>0) prnt2(&string[na+1]);
