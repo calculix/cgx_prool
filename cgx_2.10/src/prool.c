@@ -11,6 +11,16 @@ Use PROOL command in CGX main window for additional info\n\
 ",__DATE__,__TIME__);
 }
 
+char *strcpy_prool (char *dest, char *src) // function from sources of OS Proolix
+{char *cc;
+if (dest==NULL) return NULL;
+if (src==NULL) return NULL;
+cc=dest;
+  do *dest++ = *src;
+  while (*src++);
+return cc;
+}
+
 void debug()
 {
 printf("fprintf\n");
@@ -1656,13 +1666,17 @@ int prnt2(char *record)
 void process_string (char str[]) // prool
 {
 char *set;
+char local_buffer[STRLEN];
 
-if (set=strstr(str,"SET="))
+strcpy(local_buffer,str);
+
+if (set=strstr(local_buffer,"SET="))
 	{
-	//printf("process_string `%s'",str);
-	strcpy(set+4,set+5);
-	//printf("->`%s'\n",str);
+	//printf("debug: process_string "); puts(local_buffer);
+	strcpy_prool(set+4,set+5);
+	//puts(local_buffer);
 	}
+strcpy(str, local_buffer);
 }
 
 void filter_string (char str[]) // prool
@@ -2056,8 +2070,11 @@ struct dirent *file;
 char buf[STRLEN];
 int string_num=1, node_num=0;
 char current_dir[255], fullname[255];
+int i;
 
-printf("WRITEONE command:\n");
+for (i=0;i<STRLEN;i++) buf[i]=0;
+
+printf("WRITEINONE command:\n");
 printf("path = `%s'\n", path);
 //if (path[0]==0) printf("path is zero ;)\n");
 
@@ -2087,6 +2104,7 @@ if (allinone==NULL) {printf("writeone error 1\n"); return;}
 f=fopen("all.msh","r");
 if (f==NULL) {printf("writeone error 2\n"); return;}
 
+for (i=0;i<STRLEN;i++) buf[i]=0;
 while (fgets(buf, STRLEN, f))
 	{
 	if (string_num++==2)
@@ -2103,12 +2121,16 @@ while (fgets(buf, STRLEN, f))
 //	if (strstr(buf,", SPOS")) continue;
 	zamena_s8(buf);
 	fputs(buf, allinone);
+	for (i=0;i<STRLEN;i++) buf[i]=0;
 	}
 fclose(f);
 
 unlink("all.msh");
 
 fputs("", allinone); // empty string
+for (i=0;i<STRLEN;i++) buf[i]=0;
+
+//fputs("prooldebug label 1", allinone); // prool debug: don't forget to delete this line NAHER
 
 dir=opendir(".");
 while(file=readdir(dir))
@@ -2133,6 +2155,7 @@ while(file=readdir(dir))
 				
 			f=fopen(fn,"r");
 			if (f==NULL) {printf("writeone error 2A\n"); return;}
+			for (i=0;i<STRLEN;i++) buf[i]=0;
 			while (fgets(buf, STRLEN, f))
 				{
 				process_string(buf);
@@ -2140,6 +2163,7 @@ while(file=readdir(dir))
 //				if (strstr(buf,", SPOS")) continue;
 				zamena_s8(buf);
 				fputs(buf, allinone);
+				for (i=0;i<STRLEN;i++) buf[i]=0;
 				}
 			fclose(f);
 			unlink(fn);
@@ -2150,6 +2174,7 @@ while(file=readdir(dir))
 closedir(dir);
 
 fputs("", allinone); // empty string
+//fputs("prooldebug label 2", allinone); // prool debug: don't forget to delete this line NAHER
 
 dir=opendir(".");
 while(file=readdir(dir))
@@ -2158,13 +2183,16 @@ while(file=readdir(dir))
 	if (strlen(fn)>4)
 		if (!strcmp(fn+strlen(fn)-4,".sur"))
 			{
-			if (!strcmp(fn,"all.nam"))  { unlink(fn); continue; }
-			if (!strcmp(fn,"Eall.nam")) { unlink(fn); continue; }
-			if (!strcmp(fn,"Nall.nam")) { unlink(fn); continue; }
+			#if 0
+			if (!strcmp(fn,"all.sur"))  { unlink(fn); continue; } // all.nam? or all.sur?
+			if (!strcmp(fn,"Eall.sur")) { unlink(fn); continue; }
+			if (!strcmp(fn,"Nall.sur")) { unlink(fn); continue; }
+			#endif
 			{
 			printf("copy %s ->\n",fn);
 			f=fopen(fn,"r");
 			if (f==NULL) {printf("writeone error 2A\n"); return;}
+			for (i=0;i<STRLEN;i++) buf[i]=0;
 			while (fgets(buf, STRLEN, f))
 				{
 				process_string2(buf);
@@ -2172,6 +2200,7 @@ while(file=readdir(dir))
 //				if (strstr(buf,", SPOS")) continue;
 				zamena_s8(buf);
 				fputs(buf, allinone);
+				for (i=0;i<STRLEN;i++) buf[i]=0;
 				}
 			fclose(f);
 			unlink(fn);
@@ -2185,7 +2214,7 @@ fflush(NULL);
 fclose(allinone);
 flag(); 
 }
-// end of writeinone() // by prool
+// end of writeinone() // by prool // используемые функции: в частности, unlink ;-)
 
 void write4shell(char *path) // prool
 {
