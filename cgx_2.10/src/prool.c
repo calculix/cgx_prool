@@ -694,6 +694,7 @@ int prnt2(char *record)
           if (!set[i].type)
           {
             printf ("%-5d %s stat:%c n:%d e:%d f:%d p:%d l:%d s:%d b:%d L:%d S:%d se:%d sh:%d v:%d\n", set[i].index, set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh, set[i].anz_v);
+            fprintf (f, "%s\n", set[i].name);
           }
         }
       }
@@ -1661,7 +1662,7 @@ int prnt2(char *record)
   fflush(NULL); fclose(f); flag(); return(1);
 }
 
-// prnt2() end
+// prnt2() end. используемые вызовы: в частности, printf
 
 void process_string (char str[]) // prool
 {
