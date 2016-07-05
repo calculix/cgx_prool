@@ -40,9 +40,7 @@ Peter Heppel Jan 2016
 
 #include "prool.h" // prool
 
-
 #define TEST 0
-
 
 /* choose the optimization-steps for the mesher */
 #define MESHOPT_LENGTH 1
@@ -11710,6 +11708,7 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   else if (compareStrings(type, "WRITEINONE")>0) writeinone(&string[na+1]);
   else if (compareStrings(type, "WRITE4SHELL")>0) write4shell(&string[na+1]);
   else if (compareStrings(type, "ECHO")>0) echo(&string[na+1]);
+  else if (compareStrings(type, "CGNODES")>0) cgnodes(&string[na+1]);
   else if (compareStrings(type, "SENDPRES")>0) sendpres(&string[na+1]);
   else if (compareStrings(type, "SENDPRES4SHELL")>0) sendpres4shell(&string[na+1]);
   else if (compareStrings(type, "SENDASTER")>0) sendaster(&string[na+1]);

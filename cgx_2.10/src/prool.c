@@ -6,7 +6,7 @@ FILE *f; // prool
 void  prool_version()
 {
 printf("Built by Prool %s %s proolix@gmail.com\n\
-http://calculixforwin.com\n\
+http://calculix.kharkov.org\n\
 Use PROOL command in CGX main window for additional info\n\
 ",__DATE__,__TIME__);
 }
@@ -478,7 +478,7 @@ SENDNAS path - send all nas -> path\n\
 SENDSTL path - send all stl -> path\n\
 	For example: sendstl c:\\files\\msh\\my_mesh.stl\n\
 SENDBB - send size of bound box to file box.txt\n\
-\n\
+CGNODES <set> direction\n	direction: x, y or z\n\
 ");
 #if 0
 printf("Prool timer is ");
@@ -499,7 +499,12 @@ int prnt2(char *record)
   char parameter[20][MAX_LINE_LENGTH];
   char *str=NULL, *token=NULL, *saveptr=NULL;
 
-	f=fopen("cgx.out", "w"); // prool
+  f=fopen("cgx.out", "w");
+  if (f==NULL)
+	{
+	printf("ERROR prnt2() Can't create cgx.out file!!\n");
+	return -1;
+	}
 
   param[0]=0;
   length=sscanf(record,"%s%s%s",typ,name,param);
@@ -1705,10 +1710,12 @@ if (set=strstr(str,"NAME="))
 	}
 }
 
-void echo (char *str) // prool
+void echo (char *str)
 {
 char param1 [STRLEN], param2[STRLEN], *pp;
 int i;
+
+printf("test of cyrillic in UTF-8 codetable: %s %s %s\n", KRASN, ALFAVIT, NORM_COLOR);
 
 printf("echo `%s'", str);
 strcpy(param1,str);
@@ -2420,5 +2427,95 @@ if (!file) {printf("send_bb error: Can't create file box.txt\n"); return;}
 fprintf(file, "%e\n",maxx-minx);
 fprintf(file, "%e\n",maxy-miny);
 fprintf(file, "%e\n",maxz-minz);
+fclose(file);
+}
+
+void cgnodes (char *str)
+{
+char param1 [STRLEN], param2[STRLEN], *pp;
+int i;
+FILE *file;
+char buf[BUFLEN];
+char buf2[BUFLEN];
+int n, count, dimension;
+float x, y, z, sum;
+
+printf("cgnodes `%s'", str);
+strcpy(param1,str);
+param2[0]=0;
+for (i=0;i<STRLEN;i++)
+	if (param1[i]==' ')
+		{
+		param1[i]=0;
+		strcpy(param2,str+i+1);
+		break;
+		}
+	else    if (param1[i]==0) break;
+printf(" param1=`%s' param2=`%s'\n", param1, param2);
+#define CG_HELP "usage cgnodes <set> direction\ndirection: x, y or z\n"
+if ((param1[0]==0)||(param2[0]==0))
+	{
+	printf(CG_HELP);
+	return;
+	}
+if ((strcmp(param2,"x"))&& (strcmp(param2,"y"))&& (strcmp(param2,"z")))
+	{
+	printf(CG_HELP);
+	return;
+	}
+// create list of groups
+prnt2("se");
+// test of group name
+file=fopen("cgx.out", "r");
+if (file==NULL) {printf("ERROR cgnodes() File cgx.out not found!\n"); return;}
+while(!feof(file))
+	{char *cc;
+	buf[0]=0;
+	fgets(buf, BUFLEN, file);
+	cc=strchr(buf,'\n');
+	if (cc) *cc=0;
+	if (!strcmp(param1, buf))
+		{// correct group name!
+		printf("cgnodes() Correct group name\n");
+		break;
+		}
+	}
+fclose(file);
+unlink("cgx.out");
+if (strcmp(param1, buf)) {printf("ERROR cgnodes() incorrect group name\n"); return;}
+
+// execute SEND <set> abq (created file <set>.msh)
+snprintf(buf2, BUFLEN, " %s abq ", buf);
+//printf("exec '%s'\n", buf2);
+pre_write(buf2);
+snprintf(buf2, BUFLEN, "%s.msh", buf);
+//printf("Open file %s\n", buf2);
+file=fopen(buf2, "r");
+if (file==NULL) {printf("ERROR cgnodes() can't open %s \n", buf2); return;}
+fgets(buf, BUFLEN, file); // skip 1st line
+if (!strcmp(param2,"x")) dimension=1;
+else if (!strcmp(param2,"y")) dimension=2;
+else if (!strcmp(param2,"z")) dimension=3;
+sum=0; count=0;
+while (!feof(file))
+	{
+	n=-1;
+	fscanf(file,"%i,%e,%e,%e", &n, &x, &y, &z);
+	if (n==-1) break;
+	printf("%i %e %e %e\n", n, x, y, z);
+	count++;
+	switch(dimension)
+		{
+		case 1: sum+=x; break;
+		case 2: sum+=y; break;
+		case 3: sum+=z; break;
+		}
+	}
+fclose(file);
+printf("CGNODES: Total nodes %i\nCenter of gravity %e\n", count, sum/count);
+unlink(buf2);
+file=fopen("cg.txt","w");
+if (file==NULL) {printf("ERROR cgnodes() can't create file cg.txt\n"); return;}
+fprintf(file, "%e\n", sum/count);
 fclose(file);
 }
