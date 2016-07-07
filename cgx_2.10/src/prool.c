@@ -23,7 +23,7 @@ return cc;
 
 void debug()
 {
-printf("fprintf\n");
+//printf("default debug message\n");
 }
 
 void flag (void) // prool
@@ -37,7 +37,6 @@ fclose(flag_);
 #endif
 fflush(NULL);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // pre_area2() begin // prool!
 
 double pre_area2(char *setname)
@@ -1026,8 +1025,11 @@ int prnt2(char *record)
             printf ("%s\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh);
             if (set[i].anz_n+set[i].anz_e+set[i].anz_f+set[i].anz_p+set[i].anz_l+set[i].anz_s+set[i].anz_b+set[i].anz_nurl+set[i].anz_nurs+set[i].anz_se+set[i].anz_sh)
                 {
+		//fprintf(f,"--- 1 ---\n");
                 debug(); fprintf (f, "%s\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh);
+		//fprintf(f,"--- 2 ---\n");
                 pre_area2(set[i].name);
+		//fprintf(f,"--- 3 ---\n");
                 pre_volu2(set[i].name);
                 }
           }
@@ -1679,7 +1681,7 @@ strcpy(local_buffer,str);
 if (set=strstr(local_buffer,"SET="))
 	{
 	//printf("debug: process_string "); puts(local_buffer);
-	strcpy_prool(set+4,set+5);
+	strcpy_prool(set+4,set+5); // bugfix #1
 	//puts(local_buffer);
 	}
 strcpy(str, local_buffer);
@@ -1693,7 +1695,7 @@ if (set=strstr(str,"TYPE=STRI65"))
 	{
 	printf("filter_string `%s`\n",str);
 	strcpy(set,"TYPE=S6");
-	strcpy(set+7,set+11);
+	strcpy_prool(set+7,set+11); // bugfix #2.1
 	printf("->`%s'\n",str);
 	}
 }
@@ -1705,7 +1707,7 @@ char *set;
 if (set=strstr(str,"NAME="))
 	{
 	//printf("1. %s\n",str);
-	strcpy(set+5,set+6);
+	strcpy_prool(set+5,set+6); // bugfix #2.2
 	//printf("2. %s\n",str);
 	}
 }
