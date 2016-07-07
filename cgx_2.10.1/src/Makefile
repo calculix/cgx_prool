@@ -68,5 +68,4 @@ OUTIL = $(SUTIL:.c=.o)
 cgx: $(OLIB) $(OUTIL) $(OULIB)
 	g++  $(OULIB)  $(OLIB) $(OUTIL)  $(CFLAGS) $(LFLAGS) -o  $@
 
-
-
+setFunktions.o:	setFunktions.c prool.h prool.c
