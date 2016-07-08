@@ -39,13 +39,17 @@ fflush(NULL);
 }
 // pre_area2() begin // prool!
 
-double pre_area2(char *setname)
+double pre_area2(char *setname) // prool: вот тут будем считать центр гравитации по новому!
 {
   int   i,j,k,n;
   int   nr, setNr;
   double A=0., Ae, Abuf, p[3][3], pcg[3], Ix, Iy, Ixy;
   double xcg=0., ycg=0., zcg=0.;
   double sum_valAe=0., value=0.;
+
+  // prool vars
+  int cgnodes_mode;
+  float sumx, sumy, sumz;
 
   setNr=getSetNr(setname);
   if (setNr<0)
@@ -54,11 +58,49 @@ double pre_area2(char *setname)
 	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
     return(-1);
   }
+
   if (set[setNr].anz_f<1)
   {
-    printf (" ERROR: set:%s does not contain faces\n", setname);
-	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
-    return(-1);
+    printf (" pre_area2(): set:%s does not contain faces\n", setname);
+
+  // by prool:
+  printf("pre_area2() setname='%s' n=%i f=%i\n", setname, set[setNr].anz_n, set[setNr].anz_f);
+  cgnodes_mode=0;
+  if ( (set[setNr].anz_f==0) && (set[setNr].anz_n!=0) )
+	{// cgnodes mode by prool
+	printf("cgnodes mode\n");
+	cgnodes_mode=1;
+		{// cgnodes calculate
+		char buf[BUFLEN], buf2[BUFLEN];
+		FILE *file;
+		int n, count;
+		float x,y,z;
+		// execute SEND <set> abq (created file <set>.msh)
+		snprintf(buf2, BUFLEN, " %s abq ", setname);
+		//printf("exec '%s'\n", buf2);
+		pre_write(buf2);
+		snprintf(buf2, BUFLEN, "%s.msh", setname);
+		//printf("Open file %s\n", buf2);
+		file=fopen(buf2, "r");
+		if (file==NULL) {printf("ERROR cgnodes_mode: can't open %s \n", buf2); return;}
+		fgets(buf, BUFLEN, file); // skip 1st line
+		sumx=0; sumy=0; sumz=0; count=0;
+		while (!feof(file))
+			{
+			n=-1;
+			fscanf(file,"%i,%e,%e,%e", &n, &x, &y, &z);
+			if (n==-1) break;
+			printf("%i %e %e %e\n", n, x, y, z);
+			count++; sumx+=x; sumy+=y; sumz+=z;
+			}
+		fclose(file);
+		sumx/=count; sumy/=count; sumz/=count;
+		printf("cgnodes_mode: total nodes %i\nCenter of gravity %e %e %e\n", count, sumx, sumy, sumz);
+		unlink(buf2);
+		}
+	} // end by prool
+	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", 0, sumx, sumy, sumz);
+return (0);
   }
 
   for(i=0; i<set[setNr].anz_f; i++)
@@ -342,10 +384,6 @@ double pre_volu2(char *setname)
   double vol=0., mass=0., vole, masse, x[20],y[20],z[20];
   double xcg=0., ycg=0., zcg=0., xcge, ycge, zcge;
 
-  // prool vars
-  int cgnodes_mode;
-  float sumx, sumy, sumz;
-
   setNr=getSetNr(setname);
   if (setNr<0)
   {
@@ -353,43 +391,6 @@ double pre_volu2(char *setname)
 	 fprintf(f,"0\n0\n0\n0\n"); // prool
     return(-1);
   }
-
-  // by prool:
-  printf("pre_volu2() setname='%s' n=%i f=%i\n", setname, set[setNr].anz_n, set[setNr].anz_f);
-  cgnodes_mode=0;
-  if ( (set[setNr].anz_f==0) && (set[setNr].anz_n!=0) )
-	{// cgnodes mode by prool
-	printf("cgnodes mode\n");
-	cgnodes_mode=1;
-		{// cgnodes calculate
-		char buf[BUFLEN], buf2[BUFLEN];
-		FILE *file;
-		int n, count;
-		float x,y,z;
-		// execute SEND <set> abq (created file <set>.msh)
-		snprintf(buf2, BUFLEN, " %s abq ", setname);
-		//printf("exec '%s'\n", buf2);
-		pre_write(buf2);
-		snprintf(buf2, BUFLEN, "%s.msh", setname);
-		//printf("Open file %s\n", buf2);
-		file=fopen(buf2, "r");
-		if (file==NULL) {printf("ERROR cgnodes_mode: can't open %s \n", buf2); return;}
-		fgets(buf, BUFLEN, file); // skip 1st line
-		sumx=0; sumy=0; sumz=0; count=0;
-		while (!feof(file))
-			{
-			n=-1;
-			fscanf(file,"%i,%e,%e,%e", &n, &x, &y, &z);
-			if (n==-1) break;
-			printf("%i %e %e %e\n", n, x, y, z);
-			count++; sumx+=x; sumy+=y; sumz+=z;
-			}
-		fclose(file);
-		sumx/=count; sumy/=count; sumz/=count;
-		printf("cgnodes_mode: total nodes %i\nCenter of gravity %e %e %e\n", count, sumx, sumy, sumz);
-		unlink(buf2);
-		}
-	} // end by prool
 
   for(i=0; i<set[setNr].anz_e; i++)
   {
@@ -483,44 +484,22 @@ double pre_volu2(char *setname)
   if (massFlag)     
 	{
 	printf("VOLUME:%lf  MASS:%e CENTER OF GRAVITY: %lf %lf %lf\n", vol,mass,xcg/mass,ycg/mass,zcg/mass);
-	debug();
-	if (cgnodes_mode) 
-		{
-		printf("cgnodes_mode: old result %lf\n%lf\n%lf\n%lf ", vol,xcg/mass,ycg/mass,zcg/mass);
-		printf("new %lf\n%lf\n%lf\n%lf\n", vol,sumx,sumy,sumz);
-		fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,sumx,sumy,sumz);
-		}
-	else
-		{
-		fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,xcg/mass,ycg/mass,zcg/mass);
-		}
+	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,xcg/mass,ycg/mass,zcg/mass); // prool
 	}
   else if (volFlag) 
 	{
 	printf("VOLUME:%lf CENTER OF GRAVITY: %lf %lf %lf\n", vol,xcg/vol,ycg/vol,zcg/vol);
-	debug();
-	if (cgnodes_mode)
-		{
-		printf("cgnodes_mode old reluslt %lf\n%lf\n%lf\n%lf ", vol,xcg/vol,ycg/vol,zcg/vol);
-		printf("new %lf\n%lf\n%lf\n%lf\n", vol,sumx,sumy,sumz);
-		fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,sumx,sumy,sumz);
-		}
-	else
-		{
-		fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,xcg/vol,ycg/vol,zcg/vol);
-		}
+	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,xcg/vol,ycg/vol,zcg/vol); // prool
 	}
   else  
 	{            
 	printf("VOLUME:%lf\n", vol);
-	debug();
-	if (cgnodes_mode) fprintf(f,"%lf\n%lf\n%lf\n%lf\n", vol,sumx,sumy,sumz);
-	else {fprintf(f,"%lf\n0\n0\n0\n", vol); printf("cgnodes_mode. casus #3");}
+	debug(); fprintf(f,"%lf\n0\n0\n0\n", vol); // prool
 	}
   return(vol);
 }
-// pre_volu2() end
 
+// pre_volu2() end
 void prool_commands (void)
 {
 printf("CGX is modified by Prool\n\
