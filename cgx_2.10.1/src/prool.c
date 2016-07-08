@@ -50,6 +50,7 @@ double pre_area2(char *setname) // prool: вот тут будем считат�
   // prool vars
   int cgnodes_mode;
   float sumx, sumy, sumz;
+  float zero=0;
 
   setNr=getSetNr(setname);
   if (setNr<0)
@@ -99,7 +100,7 @@ double pre_area2(char *setname) // prool: вот тут будем считат�
 		unlink(buf2);
 		}
 	} // end by prool
-	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", 0, sumx, sumy, sumz);
+	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", zero, sumx, sumy, sumz);
 return (0);
   }
 
