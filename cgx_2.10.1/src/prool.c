@@ -21,7 +21,7 @@ cc=dest;
 return cc;
 }
 
-void debug() // prooldebug ;-)
+void debug()
 {
 //printf("default debug message\n");
 }
@@ -39,7 +39,7 @@ fflush(NULL);
 }
 // pre_area2() begin // prool!
 
-double pre_area2(char *setname) // prool: вот тут будем считать центр гравитации по новому!
+double pre_area2(char *setname)
 {
   int   i,j,k,n;
   int   nr, setNr;
@@ -47,62 +47,25 @@ double pre_area2(char *setname) // prool: вот тут будем считат�
   double xcg=0., ycg=0., zcg=0.;
   double sum_valAe=0., value=0.;
 
-  // prool vars
-  int cgnodes_mode;
-  float sumx, sumy, sumz;
+  // prool variables
+  int prool_n;
   float zero=0;
 
   setNr=getSetNr(setname);
   if (setNr<0)
   {
-    printf (" ERROR: set:%s does not exist\n", setname);
+    printf (" pre_area2() ERROR: set:%s does not exist\n", setname);
+	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
+    return(-1);
+  }
+  if (set[setNr].anz_f<1)
+  {
+    printf (" pre_area2() ERROR: set:%s does not contain faces\n", setname);
 	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
     return(-1);
   }
 
-  if (set[setNr].anz_f<1)
-  {
-    printf (" pre_area2(): set:%s does not contain faces\n", setname);
-
-  // by prool:
-  printf("pre_area2() setname='%s' n=%i f=%i\n", setname, set[setNr].anz_n, set[setNr].anz_f);
-  cgnodes_mode=0;
-  if ( (set[setNr].anz_f==0) && (set[setNr].anz_n!=0) )
-	{// cgnodes mode by prool
-	printf("cgnodes mode\n");
-	cgnodes_mode=1;
-		{// cgnodes calculate
-		char buf[BUFLEN], buf2[BUFLEN];
-		FILE *file;
-		int n, count;
-		float x,y,z;
-		// execute SEND <set> abq (created file <set>.msh)
-		snprintf(buf2, BUFLEN, " %s abq ", setname);
-		//printf("exec '%s'\n", buf2);
-		pre_write(buf2);
-		snprintf(buf2, BUFLEN, "%s.msh", setname);
-		//printf("Open file %s\n", buf2);
-		file=fopen(buf2, "r");
-		if (file==NULL) {printf("ERROR cgnodes_mode: can't open %s \n", buf2); return;}
-		fgets(buf, BUFLEN, file); // skip 1st line
-		sumx=0; sumy=0; sumz=0; count=0;
-		while (!feof(file))
-			{
-			n=-1;
-			fscanf(file,"%i,%e,%e,%e", &n, &x, &y, &z);
-			if (n==-1) break;
-			printf("%i %e %e %e\n", n, x, y, z);
-			count++; sumx+=x; sumy+=y; sumz+=z;
-			}
-		fclose(file);
-		sumx/=count; sumy/=count; sumz/=count;
-		printf("cgnodes_mode: total nodes %i\nCenter of gravity %e %e %e\n", count, sumx, sumy, sumz);
-		unlink(buf2);
-		}
-	} // end by prool
-	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", zero, sumx, sumy, sumz);
-return (0);
-  }
+  prool_n=set[setNr].anz_n;
 
   for(i=0; i<set[setNr].anz_f; i++)
   {
@@ -352,7 +315,47 @@ return (0);
   }
   if(anz->l) printf("AREA:%lf  CENTER OF GRAVITY: %lf %lf %lf AVERAGE-VALUE:%f\n", A,xcg/A,ycg/A,zcg/A, sum_valAe/A);
   else   printf("AREA:%lf  CENTER OF GRAVITY: %lf %lf %lf\n", A,xcg/A,ycg/A,zcg/A);
-	debug(); fprintf(f,"%lf\n%lf\n%lf\n%lf\n", A,xcg/A,ycg/A,zcg/A); // prool // ???
+
+  debug();
+  if ( (A==zero) && (prool_n!=0) )
+	{// prool cg_nodes mode
+	// cgnodes mode by prool
+	float sumx, sumy, sumz;
+	printf("cgnodes mode\n");
+		{// cgnodes calculate
+		char buf[BUFLEN], buf2[BUFLEN];
+		FILE *file;
+		int n, count;
+		float x,y,z;
+		// execute SEND <set> abq (created file <set>.msh)
+		snprintf(buf2, BUFLEN, " %s abq ", setname);
+		//printf("exec '%s'\n", buf2);
+		pre_write(buf2);
+		snprintf(buf2, BUFLEN, "%s.msh", setname);
+		//printf("Open file %s\n", buf2);
+		file=fopen(buf2, "r");
+		if (file==NULL) {printf("ERROR cgnodes_mode: can't open %s \n", buf2); return;}
+		fgets(buf, BUFLEN, file); // skip 1st line
+		sumx=0; sumy=0; sumz=0; count=0;
+		while (!feof(file))
+			{
+			n=-1;
+			fscanf(file,"%i,%e,%e,%e", &n, &x, &y, &z);
+			if (n==-1) break;
+			printf("%i %e %e %e\n", n, x, y, z);
+			count++; sumx+=x; sumy+=y; sumz+=z;
+			}
+		fclose(file);
+		sumx/=count; sumy/=count; sumz/=count;
+		printf("cgnodes_mode: total nodes %i\nCenter of gravity %e %e %e\n", count, sumx, sumy, sumz);
+		unlink(buf2);
+		}
+	fprintf(f,"%lf\n%lf\n%lf\n%lf\n", A, sumx, sumy, sumz);
+	} // end by prool
+	else
+	{// old mode
+	fprintf(f,"%lf\n%lf\n%lf\n%lf\n", A,xcg/A,ycg/A,zcg/A);
+	}
 
   if(valuestackFlag)
   {
@@ -1065,7 +1068,7 @@ int prnt2(char *record)
           if (!set[i].type)
           {
           //  printf ("%-5d %s stat:%c n:%d e:%d f:%d p:%d l:%d s:%d b:%d L:%d S:%d se:%d sh:%d v:%d\n", set[i].index, set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh, set[i].anz_v);
-            printf ("%s\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh);
+            //printf ("%s\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", set[i].name, set[i].flag, set[i].anz_n, set[i].anz_e, set[i].anz_f, set[i].anz_p, set[i].anz_l, set[i].anz_s, set[i].anz_b, set[i].anz_nurl, set[i].anz_nurs, set[i].anz_se, set[i].anz_sh);
             if (set[i].anz_n+set[i].anz_e+set[i].anz_f+set[i].anz_p+set[i].anz_l+set[i].anz_s+set[i].anz_b+set[i].anz_nurl+set[i].anz_nurs+set[i].anz_se+set[i].anz_sh)
                 {
 		//fprintf(f,"--- 1 ---\n");
