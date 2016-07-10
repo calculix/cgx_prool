@@ -50,6 +50,7 @@ double pre_area2(char *setname)
   // prool variables
   int prool_n;
   float zero=0;
+  float sumx, sumy, sumz;
 
   setNr=getSetNr(setname);
   if (setNr<0)
@@ -58,12 +59,21 @@ double pre_area2(char *setname)
 	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
     return(-1);
   }
+#if 0
   if (set[setNr].anz_f<1)
   {
     printf (" pre_area2() ERROR: set:%s does not contain faces\n", setname);
 	   fprintf(f,"n/a\n0\n0\n0\n"); // prool
     return(-1);
   }
+#endif
+#if 1
+  if (set[setNr].anz_f<1)
+	{
+	printf("pre_area2() f=0 !\n");
+	goto l_cgnodes;
+	}
+#endif
 
   prool_n=set[setNr].anz_n;
 
@@ -320,7 +330,7 @@ double pre_area2(char *setname)
   if ( (A==zero) && (prool_n!=0) )
 	{// prool cg_nodes mode
 	// cgnodes mode by prool
-	float sumx, sumy, sumz;
+	l_cgnodes:
 	printf("cgnodes mode\n");
 		{// cgnodes calculate
 		char buf[BUFLEN], buf2[BUFLEN];
