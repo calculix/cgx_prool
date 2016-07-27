@@ -1860,6 +1860,34 @@ if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	}
 }
 
+int zamena_b32(char *str) // prool
+{
+char buffer[STRLEN];
+char *pp;
+
+if (strstr(str,"=B32R")) return;
+if (strstr(str,"=b32r")) return;
+
+if (pp=strstr(str,"=B32"))
+	{
+	printf("DEBUG zamena_b32(). str=`%s'\n", str);
+	strcpy(buffer,pp+4);
+	*(pp+4)='R';
+	strcpy(pp+5,buffer);
+	printf("DEBUG zamena_b32(). buffer=`%s'\n", buffer);
+	printf("DEBUG zamena_b32(). str=`%s'\n", str);
+	}
+else
+if (pp=strstr(str,"=b32")) {
+	printf("DEBUG zamena_b32(). str=`%s'\n", str);
+	strcpy(buffer,pp+4);
+	*(pp+4)='r';
+	strcpy(pp+5,buffer);
+	printf("DEBUG zamena_b32(). buffer=`%s'\n", buffer);
+	printf("DEBUG zamena_b32(). str=`%s'\n", str);
+	}
+}
+
 void sendaster (char *path) // prool
 {
 pre_write(" all aster ");
@@ -2186,6 +2214,7 @@ while (fgets(buf, STRLEN, f))
 	filter_string(buf);
 //	if (strstr(buf,", SPOS")) continue;
 	zamena_s8(buf);
+	zamena_b32(buf);
 	fputs(buf, allinone);
 	for (i=0;i<STRLEN;i++) buf[i]=0;
 	}
@@ -2228,6 +2257,7 @@ while(file=readdir(dir))
 				filter_string(buf);
 //				if (strstr(buf,", SPOS")) continue;
 				zamena_s8(buf);
+				zamena_b32(buf);
 				fputs(buf, allinone);
 				for (i=0;i<STRLEN;i++) buf[i]=0;
 				}
@@ -2265,6 +2295,7 @@ while(file=readdir(dir))
 				filter_string(buf);
 //				if (strstr(buf,", SPOS")) continue;
 				zamena_s8(buf);
+				zamena_b32(buf);
 				fputs(buf, allinone);
 				for (i=0;i<STRLEN;i++) buf[i]=0;
 				}
@@ -2280,7 +2311,7 @@ fflush(NULL);
 fclose(allinone);
 flag(); 
 }
-// end of writeinone() // by prool // используемые функции: в частности, unlink ;-)
+// end of writeinone() // by prool
 
 void write4shell(char *path) // prool
 {
