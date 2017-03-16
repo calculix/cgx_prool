@@ -5,14 +5,30 @@ Prool's modifications of CalculiX GraphiX (cgx)
 Ubuntu
 ------
 
-In Ubuntu 15.10 need xorg-dev:
+In Ubuntu 15.10 and 16.10 need xorg-dev:
 
 sudo apt-get install xorg-dev
 
 how to make:
 
 cd cgx_2.8/src
+
 make
+
+or
+
+cd cgx_2.10/src
+
+make
+
+In Ubuntu 16.10 with gcc6 delete please from file extUtil.h
+this 2 lines:
+
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+
+and add flag -Wno-narrowing to Makefile to CFLAGS variable
 
 how to test:
 
