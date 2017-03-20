@@ -1,4 +1,4 @@
-CFLAGS = -O3 -Wall \
+CFLAGS = -O3 -Wall -Wno-narrowing\
   -I./ \
   -I/usr/include \
   -I/usr/include/GL \

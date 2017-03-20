@@ -1844,11 +1844,13 @@ if (pp=strstr(str,", PPOS"))
 	}
 }
 
-int zamena_s8(char *str) // prool
+void zamena_s8(char *str, int parametr)
 {
 char buffer[STRLEN];
 char *pp;
 
+if (parametr==0) // add letter R
+{
 if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	{
 	printf("DEBUG zamena_s8(). str=`%s'\n", str);
@@ -1858,6 +1860,24 @@ if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	printf("DEBUG zamena_s8(). buffer=`%s'\n", buffer);
 	printf("DEBUG zamena_s8(). str=`%s'\n", str);
 	}
+}
+else // delete letter R
+{
+pp=strstr(str,"TYPE=S8R");
+if (!pp) pp=strstr(str,"TYPE=S8r");
+if (!pp) pp=strstr(str,"TYPE=s8r");
+if (!pp) pp=strstr(str,"TYPE=s8R");
+
+if (!pp) pp=strstr(str,"TYPE=S6R");
+if (!pp) pp=strstr(str,"TYPE=S6r");
+if (!pp) pp=strstr(str,"TYPE=s6r");
+if (!pp) pp=strstr(str,"TYPE=s6R");
+
+if (!pp) return;
+
+strcpy(buffer,pp+8);
+strcpy(pp+7,buffer);
+}
 }
 
 int zamena_b32(char *str) // prool
@@ -2113,7 +2133,7 @@ while (fgets(buf, STRLEN, f))
 		}
 	// process_string(buf);
 	filter_string(buf);
-	zamena_s8(buf);
+	zamena_s8(buf,0);
 	fputs(buf, allinone);
 	}
 fclose(f);
@@ -2140,7 +2160,7 @@ while(file=readdir(dir))
 				{
 				process_string(buf);
 				filter_string(buf);
-				zamena_s8(buf);
+				zamena_s8(buf,0);
 				fputs(buf, allinone);
 				}
 			fclose(f);
@@ -2213,7 +2233,7 @@ while (fgets(buf, STRLEN, f))
 	// process_string(buf);
 	filter_string(buf);
 //	if (strstr(buf,", SPOS")) continue;
-	zamena_s8(buf);
+	zamena_s8(buf,0);
 	zamena_b32(buf);
 	fputs(buf, allinone);
 	for (i=0;i<STRLEN;i++) buf[i]=0;
@@ -2256,7 +2276,7 @@ while(file=readdir(dir))
 				process_string(buf);
 				filter_string(buf);
 //				if (strstr(buf,", SPOS")) continue;
-				zamena_s8(buf);
+				zamena_s8(buf,0);
 				zamena_b32(buf);
 				fputs(buf, allinone);
 				for (i=0;i<STRLEN;i++) buf[i]=0;
@@ -2294,7 +2314,7 @@ while(file=readdir(dir))
 				process_string2(buf);
 				filter_string(buf);
 //				if (strstr(buf,", SPOS")) continue;
-				zamena_s8(buf);
+				zamena_s8(buf,0);
 				zamena_b32(buf);
 				fputs(buf, allinone);
 				for (i=0;i<STRLEN;i++) buf[i]=0;
@@ -2313,7 +2333,7 @@ flag();
 }
 // end of writeinone() // by prool
 
-void write4shell(char *path) // prool
+void write4shell(char *path, int parametr) // prool
 {
 FILE *allinone;
 DIR *dir;
@@ -2367,7 +2387,7 @@ while (fgets(buf, STRLEN, f))
 	filter_string(buf);
 //	zamena_spos(buf);
 	if (s_flag(buf)) continue;
-	zamena_s8(buf);
+	zamena_s8(buf, parametr);
 	fputs(buf, allinone);
 	}
 fclose(f);
@@ -2405,7 +2425,7 @@ while(file=readdir(dir))
 				filter_string(buf);
 //				zamena_spos(buf);
 				if (s_flag(buf)) continue;
-				zamena_s8(buf);
+				zamena_s8(buf, parametr);
 				fputs(buf, allinone);
 				}
 			fclose(f);
@@ -2438,7 +2458,7 @@ while(file=readdir(dir))
 				filter_string(buf);
 //				zamena_spos(buf);
 				if (s_flag(buf)) continue;
-				zamena_s8(buf);
+				zamena_s8(buf, parametr);
 				fputs(buf, allinone);
 				}
 			fclose(f);
@@ -2454,7 +2474,6 @@ fclose(allinone);
 flag(); 
 }
 // end of write4shell() // by prool
-
 
 void send_bbox (void)
 { /* Надо будет вот эту функцию

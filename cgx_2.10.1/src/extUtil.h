@@ -51,8 +51,10 @@ void printf_fflush(const char *fmt,...);
 /* from #include "f2c.h" */
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (double)abs(x)
+#if 0 // dirty hack by prool
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
 #define smin(a,b) (float)min(a,b)
 #define smax(a,b) (float)max(a,b)
 #define dmin(a,b) (double)min(a,b)
