@@ -11705,8 +11705,8 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   else if (compareStrings(type, "WRITE")>0) prnt2(&string[na+1]);
   else if (compareStrings(type, "WRITEONE")>0) writeone(&string[na+1]);
   else if (compareStrings(type, "WRITEINONE")>0) writeinone(&string[na+1]);
-  else if (compareStrings(type, "WRITE4SHELL")>0) write4shell(&string[na+1],0);
-  else if (compareStrings(type, "WRITE4SHELL1")>0) write4shell(&string[na+1],1);
+  else if (compareStrings(type, "WRITE4SHELLPATH")>0) write4shell(&string[na+1],0);
+  else if (compareStrings(type, "WRITE4SHELL")>0) write4shell_new(&string[na+1]);
   else if (compareStrings(type, "ECHO")>0) echo(&string[na+1]);
   else if (compareStrings(type, "CGNODES")>0) cgnodes(&string[na+1]);
   else if (compareStrings(type, "SENDPRES")>0) sendpres(&string[na+1]);

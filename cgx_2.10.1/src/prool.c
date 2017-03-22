@@ -1,7 +1,9 @@
 // prool code
 // http://calculixforwin.com http://prool.kharkov.org <proolix@gmail.com>
 
-FILE *f; // prool
+#define ALLINONE "allinone.inp"
+
+FILE *f;
 
 void  prool_version()
 {
@@ -26,7 +28,7 @@ void debug()
 //printf("default debug message\n");
 }
 
-void flag (void) // prool
+void flag (void)
 {
 FILE *flag_;
 
@@ -37,7 +39,8 @@ fclose(flag_);
 #endif
 fflush(NULL);
 }
-// pre_area2() begin // prool!
+
+// pre_area2() begin
 
 double pre_area2(char *setname)
 {
@@ -389,7 +392,7 @@ double pre_area2(char *setname)
 }
 // pre_area2() end
 
-// pre_volu2() begin // prool
+// pre_volu2() begin
 double pre_volu2(char *setname)
 {
   int   i,j;
@@ -514,6 +517,7 @@ double pre_volu2(char *setname)
 }
 
 // pre_volu2() end
+
 void prool_commands (void)
 {
 printf("CGX is modified by Prool\n\
@@ -523,7 +527,8 @@ WRITE SE - write group names to file cgx.out (first column of PRNT SE)\n\
 WRITE LIST - write PRINT SE output to file cgx.out (one value in one line)\n\
 WRITEONE [path]- SEND ALL ABQ;SEND ALL ABQ NAM -> file [path]allinone.msh\n\
 WRITEINONE - ... \n\
-WRITE4SHELL - ... \n\
+WRITE4SHELLPATH [path] - ... \n\
+WRITE4SHELL [parameter] - ...\n\
 ECHO - test kommand\n\
 SENDPRES group pressure filename - ...\n\
 SENDPRES4SHELL group pressure filename - ...\n\
@@ -1727,7 +1732,7 @@ int prnt2(char *record)
 
 // prnt2() end. используемые вызовы: в частности, printf
 
-void process_string (char str[]) // prool
+void process_string (char str[])
 {
 char *set;
 char local_buffer[STRLEN];
@@ -1743,7 +1748,7 @@ if (set=strstr(local_buffer,"SET="))
 strcpy(str, local_buffer);
 }
 
-void filter_string (char str[]) // prool
+void filter_string (char str[])
 {
 char *set;
 
@@ -1756,7 +1761,7 @@ if (set=strstr(str,"TYPE=STRI65"))
 	}
 }
 
-void process_string2 (char str[]) // prool
+void process_string2 (char str[])
 {
 char *set;
 
@@ -1812,7 +1817,7 @@ for (i=0;i<STRLEN;i++)
 			}
 }
 
-int zamena_spos(char *str) // prool
+int zamena_spos(char *str)
 {
 char buffer[STRLEN];
 char *pp;
@@ -1828,7 +1833,7 @@ if (pp=strstr(str,", SPOS"))
 	}
 }
 
-int zamena_ppos(char *str) // prool
+int zamena_ppos(char *str)
 {
 char buffer[STRLEN];
 char *pp;
@@ -1880,7 +1885,7 @@ strcpy(pp+7,buffer);
 }
 }
 
-int zamena_b32(char *str) // prool
+int zamena_b32(char *str)
 {
 char buffer[STRLEN];
 char *pp;
@@ -1908,31 +1913,31 @@ if (pp=strstr(str,"=b32")) {
 	}
 }
 
-void sendaster (char *path) // prool
+void sendaster (char *path)
 {
 pre_write(" all aster ");
 move_file("all.mail", path);
 }
 
-void sendans (char *path) // prool
+void sendans (char *path)
 {
 pre_write(" all ans ");
 move_file("all.msh", path);
 }
 
-void sendnas (char *path) // prool
+void sendnas (char *path)
 {
 pre_write(" all nas ");
 move_file("all.bdf", path);
 }
 
-void sendstl (char *path) // prool
+void sendstl (char *path)
 {
 pre_write(" all stl ");
 move_file("mesh.stl", path);
 }
 
-void sendpres (char *str) // prool
+void sendpres (char *str)
 {
 char param1 [STRLEN], param2[STRLEN], param3[STRLEN];
 char komando[STRLEN], buf[STRLEN], name_from[STRLEN], *pp;
@@ -1981,7 +1986,7 @@ if (1)
 
 }
 
-int move_file (char *file1, char *file2) // prool
+int move_file (char *file1, char *file2)
 	{FILE *file_from, *file_to;
 	char buf[STRLEN];
 
@@ -2007,7 +2012,7 @@ int move_file (char *file1, char *file2) // prool
 	return 0;
 	}// move_file
 
-int s_flag(char *str) // prool
+int s_flag(char *str)
 {
 // this is BYDLOKOD. prool
 if (strstr(str,", S"))
@@ -2020,7 +2025,7 @@ if (strstr(str,", S"))
 return 0;
 }
 
-int p_flag(char *str) // prool
+int p_flag(char *str)
 {
 // this is BYDLOKOD. prool
 if (strstr(str,", P"))
@@ -2033,7 +2038,7 @@ if (strstr(str,", P"))
 return 0;
 }
 
-void sendpres4shell (char *str) // prool
+void sendpres4shell (char *str)
 {
 char param1 [STRLEN], param2[STRLEN], param3[STRLEN];
 char komando[STRLEN], buf[STRLEN], name_from[STRLEN], *pp;
@@ -2084,7 +2089,7 @@ if (1)
 
 }
 
-void writeone(char *path) // prool
+void writeone(char *path)
 {
 FILE *allinone;
 DIR *dir;
@@ -2105,8 +2110,6 @@ pre_write(" all abq nam ");
 
 getcwd(current_dir, 255);
 printf("current dir = %s\n", current_dir);
-
-#define ALLINONE "allinone.inp"
 
 if (path[0]) {strcpy(fullname,path); strcat(fullname,"\\"); strcat(fullname,ALLINONE);}
 else strcpy(fullname,ALLINONE);
@@ -2176,7 +2179,7 @@ fclose(allinone);
 flag(); 
 }
 
-void writeinone(char *path) // prool
+void writeinone(char *path)
 {
 FILE *allinone;
 DIR *dir;
@@ -2203,8 +2206,6 @@ pre_write(" all abq sur ");
 
 getcwd(current_dir, 255);
 printf("current dir = %s\n", current_dir);
-
-#define ALLINONE "allinone.inp"
 
 if (path[0]) {strcpy(fullname,path); strcat(fullname,"\\"); strcat(fullname,ALLINONE);}
 else strcpy(fullname,ALLINONE);
@@ -2331,9 +2332,16 @@ fflush(NULL);
 fclose(allinone);
 flag(); 
 }
-// end of writeinone() // by prool
+// end of writeinone()
 
-void write4shell(char *path, int parametr) // prool
+void write4shell_new(char *path)
+{
+if (path) if (*path=='1') {write4shell("",1); return;}
+
+write4shell("",0);
+}
+
+void write4shell(char *path, int parametr)
 {
 FILE *allinone;
 DIR *dir;
@@ -2357,8 +2365,6 @@ pre_write(" all abq sur ");
 
 getcwd(current_dir, 255);
 printf("current dir = %s\n", current_dir);
-
-#define ALLINONE "allinone.inp"
 
 if (path[0]) {strcpy(fullname,path); strcat(fullname,"\\"); strcat(fullname,ALLINONE);}
 else strcpy(fullname,ALLINONE);
@@ -2473,7 +2479,7 @@ fflush(NULL);
 fclose(allinone);
 flag(); 
 }
-// end of write4shell() // by prool
+// end of write4shell()
 
 void send_bbox (void)
 { /* Надо будет вот эту функцию
