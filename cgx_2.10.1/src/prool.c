@@ -1870,13 +1870,13 @@ else // delete letter R
 {
 pp=strstr(str,"TYPE=S8R");
 if (!pp) pp=strstr(str,"TYPE=S8r");
-if (!pp) pp=strstr(str,"TYPE=s8r");
-if (!pp) pp=strstr(str,"TYPE=s8R");
+else if (!pp) pp=strstr(str,"TYPE=s8r");
+else if (!pp) pp=strstr(str,"TYPE=s8R");
 
-if (!pp) pp=strstr(str,"TYPE=S6R");
-if (!pp) pp=strstr(str,"TYPE=S6r");
-if (!pp) pp=strstr(str,"TYPE=s6r");
-if (!pp) pp=strstr(str,"TYPE=s6R");
+else if (!pp) pp=strstr(str,"TYPE=S6R");
+else if (!pp) pp=strstr(str,"TYPE=S6r");
+else if (!pp) pp=strstr(str,"TYPE=s6r");
+else if (!pp) pp=strstr(str,"TYPE=s6R");
 
 if (!pp) return;
 
