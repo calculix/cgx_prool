@@ -13,6 +13,16 @@ Use PROOL command in CGX main window for additional info\n\
 ",__DATE__,__TIME__);
 }
 
+void prool_log (char *str)
+{FILE *fp;
+#if 0
+fp=fopen("prool.log", "a");
+if (fp==NULL) return;
+fputs(str,fp);
+fclose(fp);
+#endif
+}
+
 char *strcpy_prool (char *dest, char *src) // function from sources of OS Proolix
 {char *cc;
 if (dest==NULL) return NULL;
@@ -1852,22 +1862,27 @@ if (pp=strstr(str,", PPOS"))
 void zamena_s8(char *str, int parametr)
 {
 char buffer[STRLEN];
+char buf2[STRLEN];
 char *pp;
+
+sprintf(buf2,"zamena_s8 (%i) input '%s'\n", parametr, str);
+prool_log(buf2);
 
 if (parametr==0) // add letter R to S8
 {
 if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	{
-	printf("DEBUG zamena_s8(). str=`%s'\n", str);
+//	printf("DEBUG zamena_s8(). str=`%s'\n", str);
 	strcpy(buffer,pp+7);
 	*(pp+7)='R';
 	strcpy(pp+8,buffer);
-	printf("DEBUG zamena_s8(). buffer=`%s'\n", buffer);
-	printf("DEBUG zamena_s8(). str=`%s'\n", str);
+//	printf("DEBUG zamena_s8(). buffer=`%s'\n", buffer);
+//	printf("DEBUG zamena_s8(). str=`%s'\n", str);
 	}
 }
 else if (parametr==3) // add letter R to S6/S8 in any registers
 {// this is bydlocode!!!!11111 ;-)
+prool_log("prooldebug label #1 :: write4shell 3\n");
 if (strstr(str,"TYPE=S8R")) return;
 if (strstr(str,"TYPE=S8r")) return;
 if (strstr(str,"TYPE=s8R")) return;
@@ -1885,30 +1900,45 @@ if (strstr(str,"type=S6r")) return;
 if (strstr(str,"type=s6R")) return;
 if (strstr(str,"type=s6r")) return;
 
+sprintf(buf2,"zamena_s8 (%i) input2 '%s'\n", parametr, str);
+prool_log(buf2);
+
+prool_log("prooldebug label #2\n");
 pp=strstr(str,"TYPE=S8");
 if (!pp) pp=strstr(str,"TYPE=s8");
-else if (!pp) pp=strstr(str,"type=S8");
-else if (!pp) pp=strstr(str,"type=s8");
-else if (!pp) pp=strstr(str,"type=s6");
-else if (!pp) pp=strstr(str,"type=S6");
-else if (!pp) pp=strstr(str,"TYPE=S6");
-else if (!pp) pp=strstr(str,"TYPE=s6");
-if (!pp) return;
+if (!pp) pp=strstr(str,"type=S8");
+if (!pp) pp=strstr(str,"type=s8");
+if (!pp) pp=strstr(str,"type=s6");
+if (!pp) pp=strstr(str,"type=S6");
+if (!pp) pp=strstr(str,"TYPE=S6");
+if (!pp) pp=strstr(str,"TYPE=s6");
+prool_log("prooldebug label #3\n");
+if (pp==NULL) return;
+
+sprintf(buf2,"zamena_s8 (%i) input3 '%s'\n", parametr, str);
+prool_log(buf2);
+
+prool_log("prooldebug label #4\n");
+sprintf(buf2,"DEBUG zamena 1.str=`%s'\n", str);
+prool_log(buf2);
 	strcpy(buffer,pp+7);
 	*(pp+7)='R';
 	strcpy(pp+8,buffer);
+sprintf(buf2,"DEBUG zamena buffer=`%s'\n", buffer);
+prool_log(buf2);
+sprintf(buf2,"DEBUG zamena 2.str=`%s'\n", str);
+prool_log(buf2);
 }
 else if (parametr==1) // delete letter R from S6/S8 in any registers
 {
 pp=strstr(str,"TYPE=S8R");
 if (!pp) pp=strstr(str,"TYPE=S8r");
-else if (!pp) pp=strstr(str,"TYPE=s8r");
-else if (!pp) pp=strstr(str,"TYPE=s8R");
-
-else if (!pp) pp=strstr(str,"TYPE=S6R");
-else if (!pp) pp=strstr(str,"TYPE=S6r");
-else if (!pp) pp=strstr(str,"TYPE=s6r");
-else if (!pp) pp=strstr(str,"TYPE=s6R");
+if (!pp) pp=strstr(str,"TYPE=s8r");
+if (!pp) pp=strstr(str,"TYPE=s8R");
+if (!pp) pp=strstr(str,"TYPE=S6R");
+if (!pp) pp=strstr(str,"TYPE=S6r");
+if (!pp) pp=strstr(str,"TYPE=s6r");
+if (!pp) pp=strstr(str,"TYPE=s6R");
 
 if (!pp) return;
 
@@ -2368,9 +2398,13 @@ flag();
 
 void write4shell_new(char *path)
 {
-if (path) if (*path=='1') {write4shell("",1); return;}
-
-write4shell("",0);
+char buf [STRLEN];
+int parametr=0;
+if (path) parametr=atoi(path);
+prool_log("write4shell_new()\n");
+sprintf(buf,"write4shell parametr = %i\n", parametr);
+prool_log(buf);
+write4shell("",parametr);
 }
 
 void write4shell(char *path, int parametr)
@@ -2510,6 +2544,7 @@ closedir(dir);
 fflush(NULL);
 fclose(allinone);
 flag(); 
+printf("end of write4shell\n");
 }
 // end of write4shell()
 
