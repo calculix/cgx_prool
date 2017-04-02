@@ -24,6 +24,8 @@
 #include <time.h>
 #include <sys/utsname.h>
 
+#include <stdio.h> // prool
+
 #define     VERSION         "2.12"
 #define     TEST            0
 
@@ -88,6 +90,9 @@ void generalinfo()
   printf("  -read         forces the program to read the complete result-file     \n"); 
   printf("                at startup                                              \n");     
   printf("                                                                        \n"); 
+
+prool_version(); // prool
+
 }
 
 /* 
