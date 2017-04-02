@@ -1854,7 +1854,7 @@ void zamena_s8(char *str, int parametr)
 char buffer[STRLEN];
 char *pp;
 
-if (parametr==0) // add letter R
+if (parametr==0) // add letter R to S8
 {
 if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	{
@@ -1866,7 +1866,39 @@ if (!strstr(str,"TYPE=S8R")) if (pp=strstr(str,"TYPE=S8"))
 	printf("DEBUG zamena_s8(). str=`%s'\n", str);
 	}
 }
-else // delete letter R
+else if (parametr==3) // add letter R to S6/S8 in any registers
+{// this is bydlocode!!!!11111 ;-)
+if (strstr(str,"TYPE=S8R")) return;
+if (strstr(str,"TYPE=S8r")) return;
+if (strstr(str,"TYPE=s8R")) return;
+if (strstr(str,"TYPE=s8r")) return;
+if (strstr(str,"type=S8R")) return;
+if (strstr(str,"type=S8r")) return;
+if (strstr(str,"type=s8R")) return;
+if (strstr(str,"type=s8r")) return;
+if (strstr(str,"TYPE=S6R")) return;
+if (strstr(str,"TYPE=S6r")) return;
+if (strstr(str,"TYPE=s6R")) return;
+if (strstr(str,"TYPE=s6r")) return;
+if (strstr(str,"type=S6R")) return;
+if (strstr(str,"type=S6r")) return;
+if (strstr(str,"type=s6R")) return;
+if (strstr(str,"type=s6r")) return;
+
+pp=strstr(str,"TYPE=S8");
+if (!pp) pp=strstr(str,"TYPE=s8");
+else if (!pp) pp=strstr(str,"type=S8");
+else if (!pp) pp=strstr(str,"type=s8");
+else if (!pp) pp=strstr(str,"type=s6");
+else if (!pp) pp=strstr(str,"type=S6");
+else if (!pp) pp=strstr(str,"TYPE=S6");
+else if (!pp) pp=strstr(str,"TYPE=s6");
+if (!pp) return;
+	strcpy(buffer,pp+7);
+	*(pp+7)='R';
+	strcpy(pp+8,buffer);
+}
+else if (parametr==1) // delete letter R from S6/S8 in any registers
 {
 pp=strstr(str,"TYPE=S8R");
 if (!pp) pp=strstr(str,"TYPE=S8r");
