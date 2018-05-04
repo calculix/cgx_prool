@@ -2,6 +2,7 @@
 // http://calculixforwin.com http://prool.kharkov.org <proolix@gmail.com>
 
 #define ALLINONE "allinone.inp"
+#define TMPNAME "prool.tmp"
 
 FILE *f;
 
@@ -528,7 +529,7 @@ double pre_volu2(char *setname)
 
 // pre_volu2() end
 
-void prool_commands (void)
+void prool_commands (void) // help for prool commands
 {
 printf("CGX is modified by Prool\n\
 Prool's additional commands:\n\
@@ -536,7 +537,8 @@ PROOL - prool's commands info\n\
 WRITE SE - write group names to file cgx.out (first column of PRNT SE)\n\
 WRITE LIST - write PRINT SE output to file cgx.out (one value in one line)\n\
 WRITEONE [path]- SEND ALL ABQ;SEND ALL ABQ NAM -> file [path]allinone.msh\n\
-WRITEINONE - ... \n\
+WRITEINONE [path] - ... \n\
+WRITEANDREPLACE [str1 str2 [str3 str4]] - ... \n\
 WRITE4SHELLPATH [path] - ... \n\
 WRITE4SHELL [parameter] - ...\n\
 ECHO - test kommand\n\
@@ -1783,12 +1785,12 @@ if (set=strstr(str,"NAME="))
 	}
 }
 
-void echo (char *str)
+void echo (char *str) // test command
 {
 char param1 [STRLEN], param2[STRLEN], *pp;
 int i;
 
-printf("test of cyrillic in UTF-8 codetable: %s %s %s\n", KRASN, ALFAVIT, NORM_COLOR);
+//printf("test of cyrillic in UTF-8 codetable: %s %s %s\n", KRASN, ALFAVIT, NORM_COLOR);
 
 printf("echo `%s'", str);
 strcpy(param1,str);
@@ -2700,3 +2702,254 @@ if (file==NULL) {printf("ERROR cgnodes() can't create file cg.txt\n"); return;}
 fprintf(file, "%e\n", sum/count);
 fclose(file);
 }
+
+void strtoupper(char *str)
+{
+	while (*str)
+	{
+		*str=toupper(*str);
+		str++;
+	}
+}	
+
+char *strcasestr(char *s1, char *s2) // strcasecmp similar to strstr, ignoring the case of characters
+{
+char buf1[STRLEN];
+char buf2[STRLEN];
+char *cc_;
+
+strcpy(buf1, s1);
+strcpy(buf2, s2);
+strtoupper(buf1);
+strtoupper(buf2);
+cc_=strstr(buf1, buf2);
+if (cc_==0) return 0;
+else return s1+(cc_-buf1);
+}
+
+void file_replace(char *filename, char *str1, char *str2)
+{
+FILE *fi, *fo;
+char buf[STRLEN];
+char buf2[STRLEN];
+char *cc;
+
+if (*str1==0) return;
+if (*str2==0) return;
+
+printf("file replace '%s' '%s' '%s'\n", filename, str1, str2);
+
+fi=fopen(filename,"r");
+fo=fopen("prool2.tmp","w");
+
+while (!feof(fi))
+{
+buf[0]=0;
+fgets(buf,STRLEN,fi);
+// string replace
+
+while(1) { // while #2
+
+cc=strcasestr(buf,str1);
+if (cc) {
+	printf("replace before '%s'\n", buf);
+	strcpy(buf2,cc+strlen(str1));
+	strcpy(cc,str2);
+	strcat(cc,buf2);
+	printf("replace after '%s'\n", buf);
+} else 
+break; // end if
+
+} // end while #2
+
+if (buf[0]) fputs(buf, fo);
+} // end while
+
+fclose(fi);
+fclose(fo);
+rename("prool2.tmp", filename);
+
+} // end of file_replace()
+
+void writeandreplace(char *str)
+{
+FILE *allinone;
+DIR *dir;
+struct dirent *file;
+int string_num=1, node_num=0;
+char current_dir[255], filename[255];
+int i;
+char *cc;
+char buf[STRLEN];
+char param [4][STRLEN];
+
+for (i=0;i<STRLEN;i++) buf[i]=0;
+
+printf("writeandreplace command:\n");
+printf("str = `%s'\n", str);
+
+// parse parameters
+
+for(i=0;i<4;i++) param[i][0]=0;
+
+strcpy(buf,str);
+
+for(i=0;i<4;i++) {
+cc=strchr(buf,' ');
+if (cc) {
+	*cc=0;
+	strcpy(param[i],buf);
+	strcpy(str,cc+1);
+	strcpy(buf,str);
+} else {
+	strcpy(param[i],buf);
+	break;
+} // end if
+} // end for
+
+for(i=0;i<4;i++){
+	printf("param %i '%s'\n", i, param[i]);
+}
+
+printf("exec SEND ALL ABQ\n");
+pre_write(" all abq ");
+                                    
+printf("execute SEND ALL ABQ NAM\n");
+pre_write(" all abq nam ");
+
+printf("execute SEND ALL ABQ SUR\n");
+pre_write(" all abq sur ");
+
+getcwd(current_dir, 255);
+printf("current dir = %s\n", current_dir);
+
+strcpy(filename,TMPNAME/*ALLINONE*/);
+
+printf("copy all.msh ->\n");
+
+allinone=fopen(filename,"w");
+if (allinone==NULL) {printf("writeone error 1\n"); return;}
+
+f=fopen("all.msh","r");
+if (f==NULL) {printf("writeone error 2\n"); return;}
+
+for (i=0;i<STRLEN;i++) buf[i]=0;
+while (fgets(buf, STRLEN, f))
+	{
+	if (string_num++==2)
+		{
+		sscanf(buf,"%i",&node_num);
+		if (node_num==0)
+			{
+			printf("zero node skipped :)\n");
+			continue;
+			}
+		}
+	// process_string(buf);
+	filter_string(buf);
+//	if (strstr(buf,", SPOS")) continue;
+	zamena_s8(buf,0);
+	zamena_b32(buf);
+	fputs(buf, allinone);
+	for (i=0;i<STRLEN;i++) buf[i]=0;
+	}
+fclose(f);
+
+unlink("all.msh");
+
+fputs("", allinone); // empty string
+for (i=0;i<STRLEN;i++) buf[i]=0;
+
+//fputs("prooldebug label 1", allinone); // prool debug: don't forget to delete this line NAHER
+
+dir=opendir(".");
+while(file=readdir(dir))
+	{char *fn, *pp2, gruppa[255], komanda[255];
+	fn=file->d_name;
+	if (strlen(fn)>4)
+		if (!strcmp(fn+strlen(fn)-4,".nam"))
+			{
+			if (!strcmp(fn,"all.nam"))  { unlink(fn); continue; }
+			if (!strcmp(fn,"Eall.nam")) { unlink(fn); continue; }
+			if (!strcmp(fn,"Nall.nam")) { unlink(fn); continue; }
+			{
+			printf("copy %s ->\n",fn);
+
+				// send <èìÿ ãðóïïû> abq sur
+				strcpy(gruppa,fn);
+				pp2=strchr(gruppa,'.');
+				if (pp2) *pp2=0;
+				sprintf(komanda," %s abq sur ",gruppa);
+				printf("execute %s\n", komanda);
+				pre_write(komanda);
+				
+			f=fopen(fn,"r");
+			if (f==NULL) {printf("writeone error 2A\n"); return;}
+			for (i=0;i<STRLEN;i++) buf[i]=0;
+			while (fgets(buf, STRLEN, f))
+				{
+				process_string(buf);
+				filter_string(buf);
+//				if (strstr(buf,", SPOS")) continue;
+				zamena_s8(buf,0);
+				zamena_b32(buf);
+				fputs(buf, allinone);
+				for (i=0;i<STRLEN;i++) buf[i]=0;
+				}
+			fclose(f);
+			unlink(fn);
+			fputs("", allinone); // empty string
+			}
+			}
+	}
+closedir(dir);
+
+fputs("", allinone); // empty string
+//fputs("prooldebug label 2", allinone); // prool debug: don't forget to delete this line NAHER
+
+dir=opendir(".");
+while(file=readdir(dir))
+	{char *fn, *pp2, gruppa[255], komanda[255];
+	fn=file->d_name;
+	if (strlen(fn)>4)
+		if (!strcmp(fn+strlen(fn)-4,".sur"))
+			{
+			#if 0
+			if (!strcmp(fn,"all.sur"))  { unlink(fn); continue; } // all.nam? or all.sur?
+			if (!strcmp(fn,"Eall.sur")) { unlink(fn); continue; }
+			if (!strcmp(fn,"Nall.sur")) { unlink(fn); continue; }
+			#endif
+			{
+			printf("copy %s ->\n",fn);
+			f=fopen(fn,"r");
+			if (f==NULL) {printf("writeone error 2A\n"); return;}
+			for (i=0;i<STRLEN;i++) buf[i]=0;
+			while (fgets(buf, STRLEN, f))
+				{
+				process_string2(buf);
+				filter_string(buf);
+//				if (strstr(buf,", SPOS")) continue;
+				zamena_s8(buf,0);
+				zamena_b32(buf);
+				fputs(buf, allinone);
+				for (i=0;i<STRLEN;i++) buf[i]=0;
+				}
+			fclose(f);
+			unlink(fn);
+			fputs("", allinone); // empty string
+			}
+			}
+	}
+closedir(dir);
+
+fflush(NULL);
+fclose(allinone);
+
+// replace
+
+if (param[0][0] && param[1][0]) file_replace(TMPNAME, param[0], param[1]);
+if (param[2][0] && param[3][0]) file_replace(TMPNAME, param[2], param[3]);
+rename(TMPNAME, ALLINONE);
+flag(); 
+}
+// end of writeandreplace()
