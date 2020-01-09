@@ -70,3 +70,5 @@ cgx: $(OLIB) $(OUTIL) $(OULIB)
 
 
 
+# by prool:
+setFunktions.o:	setFunktions.c prool.h prool.c

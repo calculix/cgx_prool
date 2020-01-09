@@ -57,6 +57,10 @@ void printf_fflush(const char *fmt,...);
 #undef min
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (double)abs(x)
+#if 0 // dirty hack by prool. 03-May-2018
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
 #define imin(a,b) ((a) <= (b) ? (a) : (b))
 #define imax(a,b) ((a) >= (b) ? (a) : (b))
 #define smin(a,b) (float)imin(a,b)
