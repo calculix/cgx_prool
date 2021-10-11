@@ -30,6 +30,7 @@ Peter Heppel Jan 2016
 #include <dirent.h>
 #include <xwd.h>
 
+#include "prool.h" // prool
 
 #define TEST 0
 #define NOTHREADING 0
@@ -204,6 +205,7 @@ int       nodeCsysNr[MAX_MATERIALS];         /*  csysNr  */
 /* mpc generation between incompatible element-types for connected bodies */
 int sum_equSets=0, *depSet=NULL, *indSet=NULL;
 
+#include "prool.c" // prool's code
 
 /* returns node-Index if known, or -(Index+10) of a unused node or if none is unused -1  */
 int getNodNr(Summen *anz, Nodes *node, int nodnr )
@@ -14392,6 +14394,27 @@ int commandoInterpreter( char *type, char *string, int na, int nb, FILE *handle1
   }
   else if (compareStrings(type, "PRNT")>0) prnt(&string[na+1]);
   else if (compareStrings(type, "QUIT")>0) exit(0);
+// begin prool commands
+  else if (compareStrings(type, "PROOL")>0) prool_commands();
+  else if (compareStrings(type, "SENDBB")>0) send_bbox();
+  //else if (compareStrings(type, "TIMERON")>0) {prool_timer=1; glutTimerFunc(33, TimerFunction, 1); }
+  //else if (compareStrings(type, "TIMEROFF")>0) prool_timer=0;
+  else if (compareStrings(type, "WRITE")>0) prnt2(&string[na+1]);
+  else if (compareStrings(type, "WRITEONE")>0) writeone(&string[na+1]);
+  else if (compareStrings(type, "WRITEINONE")>0) writeinone(&string[na+1]);
+  else if (compareStrings(type, "WRITEANDREPLACE")>0) writeandreplace(&string[na+1]);
+  else if (compareStrings(type, "WW")>0) writeandreplace(&string[na+1]);
+  else if (compareStrings(type, "WRITE4SHELLPATH")>0) write4shell(&string[na+1],0);
+  else if (compareStrings(type, "WRITE4SHELL")>0) write4shell_new(&string[na+1]);
+  else if (compareStrings(type, "ECHO")>0) echo(&string[na+1]);
+  else if (compareStrings(type, "CGNODES")>0) cgnodes(&string[na+1]);
+  else if (compareStrings(type, "SENDPRES")>0) sendpres(&string[na+1]);
+  else if (compareStrings(type, "SENDPRES4SHELL")>0) sendpres4shell(&string[na+1]);
+  else if (compareStrings(type, "SENDASTER")>0) sendaster(&string[na+1]);
+  else if (compareStrings(type, "SENDANS")>0) sendans(&string[na+1]);
+  else if (compareStrings(type, "SENDNAS")>0) sendnas(&string[na+1]);
+  else if (compareStrings(type, "SENDSTL")>0) sendstl(&string[na+1]);
+// end prool commands
   else if (compareStrings(type, "READ")>0)
   {
     returnFlag=pre_read(&string[na+1]); 
