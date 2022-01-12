@@ -5,9 +5,10 @@ Prool's modifications of CalculiX GraphiX (cgx)
 Ubuntu
 ------
 
-In Ubuntu 15.10 and 16.10 need xorg-dev:
+In Ubuntu need:
 
-sudo apt-get install xorg-dev
+sudo apt install xorg-dev
+sudo apt install libglu1-mesa-dev
 
 how to make:
 
