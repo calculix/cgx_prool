@@ -1,0 +1,14 @@
+del me
+valu temperature 288.  // inlet		  
+valu pressure  1e5     // outlet		  
+valu u-velocity 247.   // inlet		  
+valu v-velocity 0.     // inlet
+mesh all block
+send all duns subsonic-inflow in subsonic-outflow out inviscid-wall wall viscous-wall profil
+
+
+
+
+
+
+
