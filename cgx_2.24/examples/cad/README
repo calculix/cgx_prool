@@ -1,0 +1,33 @@
+Purpose:
+Demonstrates how to generate a tet mesh:
+(either 'ng_vol' from the netgen pakage or tetgen (comes with cgx code)
+must be available)
+
+either use the vda2fbd converter or use the available fbd file
+(vda2fbd halter.vda > halter.fbd)
+or use the cad2fbd converter for the conversion of the step or iges files
+
+use -a for automatic mode, do not use -b!:
+cgx -a halter.fbd
+
+# generate and export a tet mesh, type:
+body ! all
+elty all te10
+#either increase the mesh density to avoid bad elements:
+div all auto 0.9
+#or change to netgen:
+asgn netgen   # Remark: default mesher tetgen generates some elements with
+              # negative jacobian if the mesh is to coarse
+mesh all
+send all abq
+(zap -NJBY)  # If tetgen was used with default mesh, delete flat surface elements
+
+
+# or do first a surface meshing with manipulations and separate tet-meshing:
+elty all
+elty all tr6u
+mesh all
+(use 'qmsh' for mesh-adjustments)
+mesh all tet
+(optionally use 'mesh all tet 2.' were '2.' is the target-size for the tet-
+ elements)

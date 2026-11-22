@@ -1,0 +1,78 @@
+#
+# ***************************************************************
+# Spatial accuracy of flow field
+# ***************************************************************
+#
+   spatial-accuracy
+#        tvd on
+#        second
+	third
+#        fifth
+#
+# ***************************************************************
+# This will actually run a simulation for 1200 steps
+# ***************************************************************
+#
+   run
+#	min-cfl
+	max-cfl
+	max-vnn
+	cfl		1.0
+	vnn		0.2
+	print-conv	10
+	print-rstrt	100
+	steps		10000
+#
+# ***************************************************************
+# Save results in a new file
+# ***************************************************************
+#
+   save-restart
+	filename	save
+#
+# ***************************************************************
+# Save plotting file
+# ***************************************************************
+#
+   save-plotting
+	filename	save
+	cell-vertices
+	variables       "p t u v vel tcnd tstag rmno"
+#
+# ****************************************************************
+# Change to time-accurate
+# ****************************************************************
+#
+#   time-accuracy
+#	2nd-implicit
+#       crank-nicholson
+#       theta                   0.6
+#	time-step		3.e-2
+#	inner-iterations	20
+#	inner-convergence	1e-8
+#
+# ****************************************************************
+# Set up movie output
+# ****************************************************************
+#
+#   movie-plotting
+# 	filename		movies
+# 	time-steps-per-frame	10
+#	variables       "p t u v vel tcnd tstag rmno"
+#
+#
+# ****************************************************************
+# Run more steps
+# ****************************************************************
+#
+#   run
+#	steps		11000
+#	print-conv      1
+#
+# ****************************************************************
+# Save new results in a new file
+# ****************************************************************
+#
+#   save-restart
+#        filename        unsteady
+   quit
